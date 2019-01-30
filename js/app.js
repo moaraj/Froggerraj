@@ -1,26 +1,25 @@
 // Enemies our player must avoid
 class Enemy {
     constructor(x, y, dt) {
-        // Variables applied to each of our instances go here,
-        // we've provided one for you to get started
         this.x = x;
         this.y = y;
         this.dt = dt;
-        // The image/sprite for our enemies, this uses
-        // a helper we've provided to easily load images
         this.sprite = 'images/enemy-bug.png';
     }
-    // Update the enemy's position, required method for game
-    // Parameter: dt, a time delta between ticks
+
     update() {
-        // You should multiply any movement by the dt parameter
-        // which will ensure the game runs at the same speed for
-        // all computers.
+        this.checkBoundary()
         this.x = this.x + 1 * this.dt;
     }
-    // Draw the enemy on the screen, required method for game
+
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+
+    checkBoundary() {
+        if (this.x > 500) {
+            this.x = -100;
+        }
     }
 }
 
@@ -32,17 +31,10 @@ class Player {
         this.sprite = 'images/char-boy.png';
     }
 
-    update(xUpdate, yUpdate) {
-        this.x = this.x + xUpdate;
-        this.y = this.y + yUpdate;
-    }
     render() {
-        console.log(this.sprite);
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
         }
-    // Now write your own player class
-    // This class requires an update(), render() and
-    // a handleInput() method.
+
     handleInput(text_input) {
         if (text_input == 'up') {
             this.update(0, 1);
@@ -61,22 +53,30 @@ class Player {
         }
         ;
     }
+
+    update(xUpdate, yUpdate) {
+        this.x = this.x + xUpdate;
+        this.y = this.y + yUpdate;
+    }
 }
 
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
-
-    player.handleInput(allowedKeys[e.keyCode]);
-});
-
+let keyboardInput = function(){
+    document.addEventListener('keyup', function(e) {
+        var allowedKeys = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down'
+        };
+        console.log(e.keyCode);
+    
+        player.handleInput(allowedKeys[e.keyCode]);
+    });
+}
+keyboardInput();
 
 
 
@@ -84,15 +84,16 @@ document.addEventListener('keyup', function(e) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
+const player = new Player(100,100)
 
+const enemy1 = new Enemy(0,50,1);
+const enemy2 = new Enemy(0,130,1);
+const enemy3 = new Enemy(0,210,1);
 
-const player = new Player(100,100);
-
-const enemy1 = new Enemy(200,200,1);
-const enemy2 = new Enemy(300,200,2);
-const enemy3 = new Enemy(400,200,3);
 const allEnemies = [];
 allEnemies.push(enemy1, enemy2, enemy3);
+
+
 
 
 
