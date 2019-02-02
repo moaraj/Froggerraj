@@ -88,9 +88,6 @@ let keyboardInput = (function () {
         player.handleInput(allowedKeys[e.keyCode]);
     });
 })();
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 let characters = {
     boy: 'images/char-boy.png',
     catGirl: 'images/char-cat-girl.png',
@@ -105,42 +102,45 @@ class GameOptions {
         this.score = score;
     }
 }
-let allEnemies = [];
-function genEnemies(yLevels = 4, speedMax = 3, prob = 70) {
-    function calcEnemyStats(yLevels, speedMax, prob) {
-        let genEnegyProb = Math.floor(Math.random() * 100) > prob;
-        let yInitEnemy = Math.floor(Math.random() * yLevels) * 80;
-        let speedInitEnemy = Math.random() * speedMax;
-        if (genEnegyProb) {
-            return new Enemy(0, yInitEnemy, speedInitEnemy);
-        }
-        else
-            return null;
+function gameStartGenEnemies(difficulty = 1) {
+    for (let index = 0; index < 4; index++) {
+        let xInit = index * Math.random() * 400;
+        let yInit = index * 80 + 50;
+        let speedInit = Math.random() * 4 + difficulty;
+        genEnemies(xInit, yInit, speedInit);
     }
-    (function addEnemyToArray() {
-        let newEnemy = calcEnemyStats(yLevels, speedMax, prob);
-        if (newEnemy)
-            allEnemies.push(newEnemy);
-    })();
-    (function arrangeEnemiesByY() {
-        allEnemies = allEnemies.sort((a, b) => {
-            console.log("sorting: " + a + " " + b);
-            if (a.y > b.y)
-                return 1;
-            else if (a.y < b.y)
-                return -1;
-            else
-                return 0;
-        });
-    })();
 }
-const player = new Player(200, 295, 30, characters.boy);
+;
+const player = new Player(200, 395, 30, characters.boy);
+let allEnemies = [];
+function arrangeEnemiesByY() {
+    allEnemies = allEnemies.sort((a, b) => {
+        console.log("sorting: " + a + " " + b);
+        if (a.y > b.y)
+            return 1;
+        else if (a.y < b.y)
+            return -1;
+        else
+            return 0;
+    });
+}
+;
+function genEnemiesProb(yLevels = 4, speedMax = 3, prob = 10) {
+    let genEnegyProb = Math.floor(Math.random() * 100) > prob;
+    if (genEnegyProb) {
+        let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
+        let speedInitEnemy = Math.random() * speedMax;
+        let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
+        allEnemies.push(newEnemy);
+        arrangeEnemiesByY();
+    }
+}
+function genEnemies(xInit, yInit, speedInit) {
+    let newEnemy = new Enemy(xInit, yInit, speedInit);
+    allEnemies.push(newEnemy);
+    arrangeEnemiesByY();
+}
 let collisionDetection = function () {
     let x_threshold = 20;
     let y_threshold = 20;
 };
-class Orange {
-    constructor(y) {
-        this.y = y;
-    }
-}

@@ -112,10 +112,6 @@ let keyboardInput = (function(){
 
 
 
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
-
 let characters = {
     boy:'images/char-boy.png',
     catGirl: 'images/char-cat-girl.png',
@@ -135,44 +131,46 @@ class GameOptions {
         this.difficulty = difficulty;
         this.score = score;
     }
+   
 }
 
+function gameStartGenEnemies(difficulty:number = 1){
+    for (let index = 0; index < 4; index++) {
+        let xInit = index * Math.random() * 400;
+        let yInit = index * 80 + 50;
+        let speedInit = Math.random() * 4 + difficulty;
+        genEnemies(xInit, yInit, speedInit);
+    }
+};
+
+const player = new Player(200,395,30,characters.boy);
 let allEnemies: Enemy[] = [];
 
-function genEnemies(yLevels:number = 4, speedMax:number = 3, prob:number = 70){  
-    function calcEnemyStats(yLevels:number, speedMax:number, prob:number){
-        let genEnegyProb = Math.floor(Math.random() * 100) > prob;
-        let yInitEnemy = Math.floor(Math.random() * yLevels) * 80;
-        let speedInitEnemy = Math.random() * speedMax;
-    
-        if(genEnegyProb){
-            return new Enemy(0, yInitEnemy, speedInitEnemy);
-        } else return null
-    }
-    
-    (function addEnemyToArray(){
-        let newEnemy = calcEnemyStats(yLevels, speedMax, prob);
-        if(newEnemy) allEnemies.push(newEnemy);
-    })();
+function arrangeEnemiesByY(){
+    allEnemies = allEnemies.sort( (a,b) => {
+        console.log("sorting: " + a + " " + b)
+        if(a.y > b.y) return 1;
+        else if(a.y < b.y) return -1;
+        else return 0;
+    });
+};
 
-    (function arrangeEnemiesByY(){
-        allEnemies = allEnemies.sort( (a,b) => {
-            console.log("sorting: " + a + " " + b)
-            if(a.y > b.y) return 1;
-            else if(a.y < b.y) return -1;
-            else return 0;
-        });
-    })();
+function genEnemiesProb(yLevels:number = 4, speedMax:number = 3, prob:number = 10){  
+    let genEnegyProb = Math.floor(Math.random() * 100) > prob;
+    if(genEnegyProb){
+        let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
+        let speedInitEnemy = Math.random() * speedMax;
+        let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
+        allEnemies.push(newEnemy);
+        arrangeEnemiesByY();
+    }
 }
 
-
-
-
-const player = new Player(200,295,30,characters.boy);
-
-
-
-
+function genEnemies(xInit:number, yInit:number, speedInit:number){
+    let newEnemy = new Enemy(xInit, yInit, speedInit)
+    allEnemies.push(newEnemy);
+    arrangeEnemiesByY();
+}
 
 
 
@@ -181,12 +179,3 @@ let collisionDetection = function(){
     let y_threshold = 20;
 };
 
-
-
-
-class Orange {
-    y: number
-    constructor(y){
-        this.y = y
-    }
-}
