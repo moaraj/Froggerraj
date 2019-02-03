@@ -109,6 +109,7 @@ function gameStartGenEnemies(difficulty = 1) {
         let yInit = index * 80 + 50;
         let speedInit = Math.random() * 4 + difficulty;
         genEnemies(xInit, yInit, speedInit);
+        genEnemies(xInit, yInit, speedInit);
     }
     ;
 }
@@ -145,14 +146,22 @@ function genEnemies(xInit, yInit, speedInit) {
     arrangeEnemiesByY();
 }
 ;
-let nearbyEnemies = function (yThreshold, xThreshold) {
+let detectNearbyEnemies = function (yThresholdTop, yThresholdBottom, xThreshold) {
     // Check Enemies nearby in Y axis
-    let yThreshold = 50;
-    let nearbyEnemies = allEnemies.filter(bug => bug.y > player.y - yThreshold).filter(bug => bug.y < player.y + yThreshold);
+    let nearbyEnemies = allEnemies.filter(bug => bug.y > player.y + 5 - yThresholdTop).filter(bug => bug.y < player.y + 5 + yThresholdBottom);
     // Check Enemies nearby in X axis
-    let xThreshold = 50;
     nearbyEnemies = nearbyEnemies.filter(bug => bug.x < player.x + xThreshold).filter(bug => bug.x > player.x - xThreshold);
     return nearbyEnemies;
 };
 let collisionDetection = function () {
+    let nearbyEnemies = detectNearbyEnemies(50, 50, 100);
+    let collidingEnemies = detectNearbyEnemies(30, 50, 57);
+    if (collidingEnemies.length > 0) {
+        let health = document.getElementById("health");
+        health.value -= 1;
+    }
+};
+let healthBar = {
+    health: document.getElementById("health"),
+    update: function (num) { this.health.value + num; }
 };
