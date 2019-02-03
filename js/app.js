@@ -101,6 +101,7 @@ class GameOptions {
         this.difficulty = difficulty;
         this.score = score;
     }
+    ;
 }
 function gameStartGenEnemies(difficulty = 1) {
     for (let index = 0; index < 4; index++) {
@@ -109,6 +110,7 @@ function gameStartGenEnemies(difficulty = 1) {
         let speedInit = Math.random() * 4 + difficulty;
         genEnemies(xInit, yInit, speedInit);
     }
+    ;
 }
 ;
 const player = new Player(200, 395, 30, characters.boy);
@@ -134,13 +136,23 @@ function genEnemiesProb(yLevels = 4, speedMax = 3, prob = 10) {
         allEnemies.push(newEnemy);
         arrangeEnemiesByY();
     }
+    ;
 }
+;
 function genEnemies(xInit, yInit, speedInit) {
     let newEnemy = new Enemy(xInit, yInit, speedInit);
     allEnemies.push(newEnemy);
     arrangeEnemiesByY();
 }
+;
+let nearbyEnemies = function (yThreshold, xThreshold) {
+    // Check Enemies nearby in Y axis
+    let yThreshold = 50;
+    let nearbyEnemies = allEnemies.filter(bug => bug.y > player.y - yThreshold).filter(bug => bug.y < player.y + yThreshold);
+    // Check Enemies nearby in X axis
+    let xThreshold = 50;
+    nearbyEnemies = nearbyEnemies.filter(bug => bug.x < player.x + xThreshold).filter(bug => bug.x > player.x - xThreshold);
+    return nearbyEnemies;
+};
 let collisionDetection = function () {
-    let x_threshold = 20;
-    let y_threshold = 20;
 };

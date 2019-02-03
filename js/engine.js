@@ -66,6 +66,9 @@ var Engine = (function(global) {
         reset();
         lastTime = Date.now();
         main();
+
+        // Enemies rendered at the start of the game
+        gameStartGenEnemies();
     }
 
     /* This function is called by main (our game loop) and itself calls all

@@ -130,7 +130,7 @@ class GameOptions {
         this.character = character;
         this.difficulty = difficulty;
         this.score = score;
-    }
+    };
    
 }
 
@@ -140,7 +140,7 @@ function gameStartGenEnemies(difficulty:number = 1){
         let yInit = index * 80 + 50;
         let speedInit = Math.random() * 4 + difficulty;
         genEnemies(xInit, yInit, speedInit);
-    }
+    };
 };
 
 const player = new Player(200,395,30,characters.boy);
@@ -163,19 +163,27 @@ function genEnemiesProb(yLevels:number = 4, speedMax:number = 3, prob:number = 1
         let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
         allEnemies.push(newEnemy);
         arrangeEnemiesByY();
-    }
-}
+    };
+};
 
 function genEnemies(xInit:number, yInit:number, speedInit:number){
     let newEnemy = new Enemy(xInit, yInit, speedInit)
     allEnemies.push(newEnemy);
     arrangeEnemiesByY();
+};
+
+
+let nearbyEnemies = function(yThreshold:number, xThreshold:number):Enemy[]{
+        // Check Enemies nearby in Y axis
+        let yThreshold = 50;
+        let nearbyEnemies = allEnemies.filter(bug => bug.y > player.y - yThreshold).filter(bug => bug.y < player.y + yThreshold)
+        // Check Enemies nearby in X axis
+        let xThreshold = 50;
+        nearbyEnemies = nearbyEnemies.filter(bug => bug.x < player.x + xThreshold).filter(bug => bug.x > player.x - xThreshold)
+        return nearbyEnemies
 }
 
-
-
 let collisionDetection = function(){
-    let x_threshold = 20;
-    let y_threshold = 20;
-};
+
+}
 
