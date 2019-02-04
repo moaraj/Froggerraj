@@ -36,17 +36,26 @@ class Enemy {
 class Player {
     x: number;
     y: number;
+    xInit: number;
+    yInit: number;
     speed: number;
     sprite: string;
     win: boolean;
+    lives: number;
+    totalLives: number;
+    health: number
 
     constructor(x: number, y: number, speed: number, sprite: string) {
         this.x = x;
         this.y = y;
+        this.xInit = x;
+        this.yInit = y;
         this.speed = speed;
         this.win = false;
         this.sprite = sprite;
-        
+        this.lives = 3;
+        this.totalLives = 3;
+        this.health = 100;
     }
 
     render() {
@@ -159,7 +168,6 @@ class GameOptions {
         this.difficulty = difficulty;
         this.score = score;
     };
-   
 }
 
 function gameStartGenEnemies(difficulty:number = 1){
@@ -192,12 +200,12 @@ function genEnemies(xInit:number, yInit:number, speedInit:number){
     arrangeEnemiesByY();
 };
 
-function genEnemiesProb(yLevels:number = 4, speedMax:number = 2, prob:number = 20, maxEnemies: number = 25){  
+function genEnemiesProb(yLevels:number = 4, speedMax:number = 2, prob:number = 10, maxEnemies: number = 25){  
     // The larger allEnemies Array becomes, the less likely an new enemy will spawn
-    let genEnemyProb = Math.floor(Math.random() * 100) > prob + allEnemies.length * 5;
-    console.log(prob + allEnemies.length * 2)
+    let genEnemyProb = Math.floor(Math.random() * 100) > prob + allEnemies.length;
+    // console.log(prob + allEnemies.length * 2)
     if(genEnemyProb && allEnemies.length < maxEnemies){
-        console.log('bug generated');
+        // console.log('bug generated');
         let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
         let speedInitEnemy = Math.random() * speedMax + 1;
         let newEnemy = new Enemy(-100, yInitEnemy, speedInitEnemy);
@@ -215,29 +223,71 @@ function deleteEnemiesProb(prob:number = 90){
             let delEnemyProb = Math.floor(Math.random() * 100) > prob - allEnemies.length * 5;
             if(delEnemyProb){
                 allEnemies.splice(index, 1);
-                console.log('deleteing bug')
+                // console.log('deleteing bug')
             }; // if prob delete
         }; // Bug is off screen and more than 7 enemies exist
     });
 };
 
 
-let detectNearbyEnemies = function(yThresholdTop:number, yThresholdBottom:number, xThreshold:number):Enemy[]{
+let detectNearbyEnemies = function(enemyArray:Enemy[], yThresholdTop:number, yThresholdBottom:number, xThreshold:number):Enemy[]{
         // Check Enemies nearby in Y axis
-        let nearbyEnemies = allEnemies.filter(bug => bug.y > player.y + 5 - yThresholdTop).filter(bug => bug.y < player.y + 5 + yThresholdBottom)
+        let nearbyEnemies = enemyArray.filter(bug => bug.y > player.y + 5 - yThresholdTop).filter(bug => bug.y < player.y + 5 + yThresholdBottom)
         // Check Enemies nearby in X axis
         nearbyEnemies = nearbyEnemies.filter(bug => bug.x < player.x + xThreshold).filter(bug => bug.x > player.x - xThreshold)
         return nearbyEnemies
 }
 
 let collisionDetection = function(){
-    let nearbyEnemies = detectNearbyEnemies(50,50,100);
-    let collidingEnemies = detectNearbyEnemies(30,50,57);
-    if (collidingEnemies.length > 0) {
-        let health = document.getElementById("health")
-        health.value -= 3;
-    }
+    let nearbyEnemies = detectNearbyEnemies(allEnemies,50,50,100);
+    let collidingEnemies = detectNearbyEnemies(nearbyEnemies,30,50,57);
+
+    if (collidingEnemies.length > 0) updatePlayerHealth();
 }
+
+const updatePlayerHealth = function(){
+    // If Collision is deteched player health is reduced
+    let health = document.getElementById("health");
+    player.health -= 3;
+    // If player health is reduced to 0, 1 life is reduced
+    if (player.health <= 0) {
+        player.x = player.xInit;
+        player.y = player.yInit;
+        player.health += 100;
+        player.lives -= 1;
+        updatePlayerHearts();
+        
+    };
+    health.value = player.health;
+};
+
+const updatePlayerHearts = function(){
+    // This function adds 3 hearts div to hud
+    // it checks if its there, deletes and regenerarets
+    // heart acoording to number lives vs. total lives in player objects
+
+    let hud = document.getElementsByClassName('hud-status').item(0);
+
+    if(document.getElementById('health-heart')){
+        hud.removeChild(hud.lastElementChild);
+    }
+    
+    let frag = document.createElement('div');
+    frag.setAttribute('id', 'health-heart');
+
+    let range = [...Array(player.totalLives).keys()];
+    range.forEach(index => {
+        let heart = document.createElement('i')
+        if(index + 1 <= player.lives){
+            heart.classList.add("nes-icon", "heart", "is-medium");
+        } else {
+            heart.classList.add("nes-icon", "heart", "is-empty");
+        }
+        frag.appendChild(heart);
+    });
+    hud.appendChild(frag);
+};
+
 
 
 let detectOtherBugs = function () {
@@ -248,16 +298,11 @@ let detectOtherBugs = function () {
             if(bug.x > thisBug.x - 100){
                 bug.dt = thisBug.dt;
                 bug.x = thisBug.x -100;
-            }; // If Bug behing is close that THIS bugs position - a buffer of 70 pixels, make its speed the same as thisBugs speed so they dont bump
+            }; // If Bug behind is close that THIS bugs position - a buffer of 70 pixels, make its speed the same as thisBugs speed so they dont bump
         });
 
         });
     };
-
-let healthBar = {
-    health : document.getElementById("health"),
-    update : function(num){this.health.value + num}    
-}
 
 
 

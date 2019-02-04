@@ -74,6 +74,7 @@ var Engine = (function(global) {
 
         // Enemies rendered at the start of the game
         gameStartGenEnemies();
+        updatePlayerHearts();
     }
 
     /* This function is called by main (our game loop) and itself calls all

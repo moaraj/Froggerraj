@@ -12,6 +12,7 @@ body {
 }
 
 .game-screen {
+    position: relative;
     width: 660px;
     min-height: 680px;
     /* background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%); */
@@ -75,19 +76,22 @@ img {
     font-size: x-large;
   }
 
-progress {  
-      border-radius: 2px; 
-      width: 80%;
-      background-size: 35px 20px, 100% 100%, 100% 100%;
-  }
 
   .start-game {
       background-color: rgb(69, 71, 71);
   }
 
+
+  #health {
+    width: 40%;
+  }
+
   .hud-status {
-      width: 80%;
-      display: inline-block;
+      position:absolute;
+      top: 10px;
+      width: 505px;
+      display: flex;
       align-content: center;
-      justify-content: space-around;
+      justify-content: space-between;
+      
   }
