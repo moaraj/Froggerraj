@@ -1,15 +1,46 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Froggeraj</title>
     <link rel="stylesheet" href="css/style.css">
+    
 </head>
+
 <body>
-    <progress id="health" value="100" max="100"></progress>
+    <div class="container">
+
+        
+        <div class="start-screen">
+            <h2>Select your hero!</h2>
+            <div class="character-icon"><img src="./images/char-boy.png"></div>
+            <div class="character-icon"><img src="./images/char-cat-girl.png"></div>
+            <div class="character-icon"><img src="./images/char-horn-girl.png"></div>
+            <div class="character-icon"><img src="./images/char-pink-girl.png"></div>
+            <div class="character-icon"><img src="./images/char-princess-girl.png"></div>
+
+            <div class="difficulty">
+                </div>
+        </div>
+
+        <div class="start-screen" id="game-screen">
+            <progress id="health" value="100" max="100"></progress>
+        </div>
+
+        <div class="start-screen" id="end-screen">
+        </div>
+
+
+
+
+
+    </div> <!-- container -->
+
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
-    
+
 </body>
+
 </html>
