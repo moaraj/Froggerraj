@@ -1,0 +1,23 @@
+{
+  "name": "froggerraj",
+  "version": "1.0.0",
+  "description": "Remix on retro frogger game",
+  "main": "index.js",
+  "dependencies": {
+    "nes.css": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moaraj/Froggerraj.git"
+  },
+  "author": "Moaraj Hasan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moaraj/Froggerraj/issues"
+  },
+  "homepage": "https://github.com/moaraj/Froggerraj#readme"
+}
