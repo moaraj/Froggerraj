@@ -77,7 +77,7 @@ img {
 
 progress {  
       border-radius: 2px; 
-      width: 100%;
+      width: 80%;
       background-size: 35px 20px, 100% 100%, 100% 100%;
   }
 
@@ -87,7 +87,7 @@ progress {
 
   .hud-status {
       width: 80%;
-      display: flex;
+      display: inline-block;
       align-content: center;
       justify-content: space-around;
   }

@@ -192,11 +192,12 @@ function genEnemies(xInit:number, yInit:number, speedInit:number){
     arrangeEnemiesByY();
 };
 
-function genEnemiesProb(yLevels:number = 4, speedMax:number = 2, prob:number = 20, maxEnemies: number = 20){  
+function genEnemiesProb(yLevels:number = 4, speedMax:number = 2, prob:number = 20, maxEnemies: number = 25){  
     // The larger allEnemies Array becomes, the less likely an new enemy will spawn
     let genEnemyProb = Math.floor(Math.random() * 100) > prob + allEnemies.length * 5;
     console.log(prob + allEnemies.length * 2)
     if(genEnemyProb && allEnemies.length < maxEnemies){
+        console.log('bug generated');
         let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
         let speedInitEnemy = Math.random() * speedMax + 1;
         let newEnemy = new Enemy(-100, yInitEnemy, speedInitEnemy);
