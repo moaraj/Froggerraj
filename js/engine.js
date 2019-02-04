@@ -89,8 +89,9 @@ var Engine = (function(global) {
     function update(dt) {
         // checkCollisions();
         deleteEnemiesProb();
-        collisionDetection();
+        
         updateEntities(dt);
+        collisionDetection();
         detectOtherBugs();
     }
 

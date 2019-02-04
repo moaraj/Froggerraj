@@ -205,7 +205,7 @@ let collisionDetection = function () {
 const updatePlayerHealth = function () {
     // If Collision is deteched player health is reduced
     let health = document.getElementById("health");
-    player.health -= 3;
+    player.health -= 5;
     // If player health is reduced to 0, 1 life is reduced
     if (player.health <= 0) {
         player.x = player.xInit;
