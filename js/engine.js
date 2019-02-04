@@ -87,10 +87,10 @@ var Engine = (function(global) {
      */
     function update(dt) {
         // checkCollisions();
+        deleteEnemiesProb();
         collisionDetection();
         updateEntities(dt);
-  
-
+        detectOtherBugs();
     }
 
     /* This is called by the update function and loops through all of the
@@ -104,7 +104,6 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        detectOtherBugs();
         player.update();
     }
 

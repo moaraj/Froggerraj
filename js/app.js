@@ -17,6 +17,7 @@ class Enemy {
     }
     checkBoundary() {
         if (this.x > 500) {
+            genEnemiesProb();
             this.x = -100;
             this.dt = this.dtInitial;
         }
@@ -135,6 +136,7 @@ function gameStartGenEnemies(difficulty = 1) {
 ;
 let allEnemies = [];
 function arrangeEnemiesByY() {
+    // Arrange Bugs according to thier Y position to render properly
     allEnemies = allEnemies.sort((a, b) => {
         // console.log("sorting: " + a + " " + b)
         if (a.y > b.y)
@@ -146,22 +148,39 @@ function arrangeEnemiesByY() {
     });
 }
 ;
-function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10) {
-    let genEnegyProb = Math.floor(Math.random() * 100) > prob;
-    if (genEnegyProb) {
+function genEnemies(xInit, yInit, speedInit) {
+    let newEnemy = new Enemy(xInit, yInit, speedInit);
+    allEnemies.push(newEnemy);
+    arrangeEnemiesByY();
+}
+;
+function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 20, maxEnemies = 20) {
+    // The larger allEnemies Array becomes, the less likely an new enemy will spawn
+    let genEnemyProb = Math.floor(Math.random() * 100) > prob + allEnemies.length * 5;
+    console.log(prob + allEnemies.length * 2);
+    if (genEnemyProb && allEnemies.length < maxEnemies) {
         let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
         let speedInitEnemy = Math.random() * speedMax + 1;
-        let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
+        let newEnemy = new Enemy(-100, yInitEnemy, speedInitEnemy);
         allEnemies.push(newEnemy);
         arrangeEnemiesByY();
     }
     ;
 }
 ;
-function genEnemies(xInit, yInit, speedInit) {
-    let newEnemy = new Enemy(xInit, yInit, speedInit);
-    allEnemies.push(newEnemy);
-    arrangeEnemiesByY();
+function deleteEnemiesProb(prob = 90) {
+    // The larger allEnemies Array becomes, the more likely an enemy will be deleted
+    allEnemies.forEach((bug, index) => {
+        if (bug.x > 500 && allEnemies.length > 7) {
+            let delEnemyProb = Math.floor(Math.random() * 100) > prob - allEnemies.length * 5;
+            if (delEnemyProb) {
+                allEnemies.splice(index, 1);
+                console.log('deleteing bug');
+            }
+            ; // if prob delete
+        }
+        ; // Bug is off screen and more than 7 enemies exist
+    });
 }
 ;
 let detectNearbyEnemies = function (yThresholdTop, yThresholdBottom, xThreshold) {
@@ -176,7 +195,7 @@ let collisionDetection = function () {
     let collidingEnemies = detectNearbyEnemies(30, 50, 57);
     if (collidingEnemies.length > 0) {
         let health = document.getElementById("health");
-        health.value -= 1;
+        health.value -= 3;
     }
 };
 let detectOtherBugs = function () {
