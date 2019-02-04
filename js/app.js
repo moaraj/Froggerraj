@@ -25,8 +25,8 @@ class Player {
         this.x = x;
         this.y = y;
         this.speed = speed;
-        this.sprite = sprite;
         this.win = false;
+        this.sprite = sprite;
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -88,13 +88,30 @@ let keyboardInput = (function () {
         player.handleInput(allowedKeys[e.keyCode]);
     });
 })();
+const player = new Player(200, 395, 30, 'images/char-boy.png');
 let characters = {
     boy: 'images/char-boy.png',
     catGirl: 'images/char-cat-girl.png',
     hornGirl: 'images/char-horn-girl.png',
     pinkGirl: 'images/char-pink-girl.png',
-    princessGirl: 'images/char-pink-girl.png',
+    selected: 'images/char-boy.png'
 };
+let characterDeck = document.getElementById('character-deck');
+if (characterDeck) {
+    characterDeck.addEventListener('click', selectCharacter, false);
+}
+function selectCharacter(event) {
+    if (event.target !== event.currentTarget) {
+        if (event.target.lastChild) {
+            characters.selected = characters[event.target.lastChild.id];
+        }
+        else {
+            // console.log(event.target.parentElement.lastChild.id)
+            characters.selected = characters[event.target.parentElement.lastChild.id];
+        }
+        player.sprite = characters.selected;
+    }
+}
 class GameOptions {
     constructor(difficulty, character, score) {
         this.character = character;
@@ -114,7 +131,6 @@ function gameStartGenEnemies(difficulty = 1) {
     ;
 }
 ;
-const player = new Player(200, 395, 30, characters.boy);
 let allEnemies = [];
 function arrangeEnemiesByY() {
     allEnemies = allEnemies.sort((a, b) => {

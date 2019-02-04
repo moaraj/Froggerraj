@@ -3,12 +3,6 @@ body {
     background: #4eb9c7;
 }
 
-h2 {
-    font-family: sans-serif;
-    font-size: xx-large;
-}
-
-
 
 .container {
     display: flex;
@@ -20,7 +14,10 @@ h2 {
 .start-screen {
     width: 660px;
     min-height: 680px;
-    background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
+    /* background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%); */
+    background-image: url("../images/Clouds.gif");
+    background-size: cover; /* Resize the background image to cover the entire container */
+
     padding: 32px;
     border-radius: 10px;
     box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5);
@@ -33,15 +30,15 @@ h2 {
     margin: 0 0 3em;
 }
 
-.character-deck {
+#character-deck {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    margin: 0 0 3em;
+    margin: 0 0 0em;
 }
 
-.character-icon {
+.character-card {
     height: 200px;
     width: 200px;
     background: #2e3d49;
@@ -68,8 +65,29 @@ img {
     100% {padding-bottom: 20px;}
   }
 
+  .difficulty-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .start-button { 
+    font-size: x-large;
+  }
 
 progress {  
       border-radius: 2px; 
+      width: 100%;
       background-size: 35px 20px, 100% 100%, 100% 100%;
+  }
+
+  .start-game {
+      background-color: rgb(69, 71, 71);
+  }
+
+  .hud-status {
+      width: 80%;
+      display: flex;
+      align-content: center;
+      justify-content: space-around;
   }

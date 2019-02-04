@@ -5,37 +5,65 @@
     <meta charset="UTF-8">
     <title>Froggeraj</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="./css/nes.css" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+
 </head>
 
 <body>
     <div class="container">
 
-        
+
         <div class="start-screen">
-            <h2>Select your hero!</h2>
-            
-            <div class="character-deck">
-            <div class="character-icon"><img src="./images/char-boy.png"></div>
-            <div class="character-icon"><img src="./images/char-cat-girl.png"></div>
-            <div class="character-icon"><img src="./images/char-horn-girl.png"></div>
-            <div class="character-icon"><img src="./images/char-pink-girl.png"></div>
-            <div class="character-icon"><img src="./images/char-princess-girl.png"></div>
+            <h3>Select your hero</h3>
+            <div id="character-deck">
+                <div id='boyCard1' class="character-card"><img id="boy" src="./images/char-boy.png"></div>
+                <div id='boyCard2' class="character-card"><img id="catGirl" src="./images/char-cat-girl.png"></div>
+                <div id='boyCard3' class="character-card"><img id="hornGirl" src="./images/char-horn-girl.png"></div>
+                <div id='boyCard4'class="character-card"><img id='pinkGirl' src="./images/char-pink-girl.png"></div>
+                <!-- <div class="character-card"><img src="./images/char-princess-girl.png"></div> -->
             </div>
-            
-            <div class="difficulty">
-            <div class="start">
-                <button>Start Game</button>
-            </div>
+
+            <div class="difficulty-box">
+                <h3 class="title">Select difficulty</h3>
+                <div>
+                    <label data-children-count="1">
+                        <input type="radio" class="nes-radio" name="answer" checked="">
+                        <span>Easy</span>
+                    </label>
+                    <label data-children-count="1">
+                        <input type="radio" class="nes-radio" name="answer">
+                        <span>Hard</span>
+                    </label>
                 </div>
+            </div>
+
+            <div class="start">
+                    <button class="nes-button start-button">Start Game</button>
+            </div>
         </div>
 
         <div class="start-screen" id="game-screen">
-            <progress id="health" value="100" max="100"></progress>
+            <div class="hud-status">
+                
+                <progress id="health" class="nes-progress is-error"  value="100" max="100"></progress>
+            </div>
+
         </div>
 
         <div class="start-screen" id="end-screen">
+            <div class="nes-container is-rounded is-dark">
+                <p>Good morning. Thou hast had a good night's sleep, I hope.</p>
+            </div>
+            <div><br><br><br>
+
+
+
+            </div>
+            <button type="button" class="nes-btn">Change Hero or Difficulty</button>
+            <button type="button" class="nes-btn">Try Again</button>
+            <button type="button" class="nes-btn">Play Again</button>
+
         </div>
 
 

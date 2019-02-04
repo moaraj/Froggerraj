@@ -40,8 +40,9 @@ class Player {
         this.x = x;
         this.y = y;
         this.speed = speed;
-        this.sprite = sprite;
         this.win = false;
+        this.sprite = sprite;
+        
     }
 
     render() {
@@ -68,6 +69,7 @@ class Player {
     }
 
     update(xUpdate = 0, yUpdate = 0) {
+
         if (this.x + xUpdate > 400) {
             this.x = 410;
             xUpdate = 0;
@@ -112,12 +114,34 @@ let keyboardInput = (function(){
 
 
 
+const player = new Player(200,395,30, 'images/char-boy.png');
+
+
 let characters = {
     boy:'images/char-boy.png',
     catGirl: 'images/char-cat-girl.png',
     hornGirl: 'images/char-horn-girl.png',
     pinkGirl: 'images/char-pink-girl.png',
-    princessGirl: 'images/char-pink-girl.png',
+    selected: 'images/char-boy.png'
+}
+
+let characterDeck = document.getElementById('character-deck');
+if (characterDeck) {
+    characterDeck.addEventListener('click', selectCharacter, false);        
+}
+
+
+function selectCharacter(event) {
+    if (event.target !== event.currentTarget) {
+        if (event.target.lastChild) {
+        characters.selected = characters[event.target.lastChild.id] ;
+        } else {
+        // console.log(event.target.parentElement.lastChild.id)
+        characters.selected = characters[event.target.parentElement.lastChild.id];
+        }
+
+        player.sprite = characters.selected;
+    }
 }
 
 
@@ -144,7 +168,7 @@ function gameStartGenEnemies(difficulty:number = 1){
     };
 };
 
-const player = new Player(200,395,30,characters.boy);
+
 let allEnemies: Enemy[] = [];
 
 function arrangeEnemiesByY(){
@@ -195,4 +219,6 @@ let healthBar = {
     health : document.getElementById("health"),
     update : function(num){this.health.value + num}    
 }
+
+
 
