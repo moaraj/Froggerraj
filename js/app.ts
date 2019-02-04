@@ -3,12 +3,14 @@ class Enemy {
     x: number;
     y: number;
     dt: number;
+    dtInitial: number;
     sprite: string;
 
     constructor(x:number, y:number, dt:number) {
         this.x = x;
         this.y = y;
         this.dt = dt;
+        this.dtInitial = dt;
         this.sprite = 'images/enemy-bug.png';
     }
 
@@ -24,6 +26,7 @@ class Enemy {
     checkBoundary() {
         if (this.x > 500) {
             this.x = -100;
+            this.dt = this.dtInitial;
         }
     }
 }
@@ -173,18 +176,18 @@ let allEnemies: Enemy[] = [];
 
 function arrangeEnemiesByY(){
     allEnemies = allEnemies.sort( (a,b) => {
-        console.log("sorting: " + a + " " + b)
+        // console.log("sorting: " + a + " " + b)
         if(a.y > b.y) return 1;
         else if(a.y < b.y) return -1;
         else return 0;
     });
 };
 
-function genEnemiesProb(yLevels:number = 4, speedMax:number = 3, prob:number = 10){  
+function genEnemiesProb(yLevels:number = 4, speedMax:number = 2, prob:number = 10){  
     let genEnegyProb = Math.floor(Math.random() * 100) > prob;
     if(genEnegyProb){
         let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
-        let speedInitEnemy = Math.random() * speedMax;
+        let speedInitEnemy = Math.random() * speedMax + 1;
         let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
         allEnemies.push(newEnemy);
         arrangeEnemiesByY();
@@ -214,6 +217,21 @@ let collisionDetection = function(){
         health.value -= 1;
     }
 }
+
+
+let detectOtherBugs = function () {
+    // Figure out which bugs have bugs in the same lane
+    allEnemies.forEach(thisBug =>{
+        let bugsFollowingInLane = allEnemies.filter(bug => bug.y === thisBug.y).filter(bug => bug.x < thisBug.x);
+        bugsFollowingInLane.forEach(bug => {
+            if(bug.x > thisBug.x - 100){
+                bug.dt = thisBug.dt;
+                bug.x = thisBug.x -100;
+            }; // If Bug behing is close that THIS bugs position - a buffer of 70 pixels, make its speed the same as thisBugs speed so they dont bump
+        });
+
+        });
+    };
 
 let healthBar = {
     health : document.getElementById("health"),

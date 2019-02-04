@@ -104,6 +104,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
+        detectOtherBugs();
         player.update();
     }
 

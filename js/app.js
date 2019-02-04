@@ -5,6 +5,7 @@ class Enemy {
         this.x = x;
         this.y = y;
         this.dt = dt;
+        this.dtInitial = dt;
         this.sprite = 'images/enemy-bug.png';
     }
     update() {
@@ -17,6 +18,7 @@ class Enemy {
     checkBoundary() {
         if (this.x > 500) {
             this.x = -100;
+            this.dt = this.dtInitial;
         }
     }
 }
@@ -134,7 +136,7 @@ function gameStartGenEnemies(difficulty = 1) {
 let allEnemies = [];
 function arrangeEnemiesByY() {
     allEnemies = allEnemies.sort((a, b) => {
-        console.log("sorting: " + a + " " + b);
+        // console.log("sorting: " + a + " " + b)
         if (a.y > b.y)
             return 1;
         else if (a.y < b.y)
@@ -144,11 +146,11 @@ function arrangeEnemiesByY() {
     });
 }
 ;
-function genEnemiesProb(yLevels = 4, speedMax = 3, prob = 10) {
+function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10) {
     let genEnegyProb = Math.floor(Math.random() * 100) > prob;
     if (genEnegyProb) {
         let yInitEnemy = Math.floor(Math.random() * yLevels * 2) * 40 + 50;
-        let speedInitEnemy = Math.random() * speedMax;
+        let speedInitEnemy = Math.random() * speedMax + 1;
         let newEnemy = new Enemy(0, yInitEnemy, speedInitEnemy);
         allEnemies.push(newEnemy);
         arrangeEnemiesByY();
@@ -176,6 +178,19 @@ let collisionDetection = function () {
         let health = document.getElementById("health");
         health.value -= 1;
     }
+};
+let detectOtherBugs = function () {
+    // Figure out which bugs have bugs in the same lane
+    allEnemies.forEach(thisBug => {
+        let bugsFollowingInLane = allEnemies.filter(bug => bug.y === thisBug.y).filter(bug => bug.x < thisBug.x);
+        bugsFollowingInLane.forEach(bug => {
+            if (bug.x > thisBug.x - 100) {
+                bug.dt = thisBug.dt;
+                bug.x = thisBug.x - 100;
+            }
+            ; // If Bug behing is close that THIS bugs position - a buffer of 70 pixels, make its speed the same as thisBugs speed so they dont bump
+        });
+    });
 };
 let healthBar = {
     health: document.getElementById("health"),
