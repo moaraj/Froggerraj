@@ -104,24 +104,37 @@ let playerInventory = [];
 let staticGameObjects = [];
 let floatingGameObjects = [];
 let genFloatingGameObjects = function (gameObjectSprite, spawnLocationX, spawnLocationY, rad, points) {
+    // Function generates Game objects with random x and y block placements
     let [xObj, yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
-    floatingGameObjects.push(new FloatingObject(xObj, yObj, rad, gameObjectSprite, points));
+    // if there is already as object at the same y, re randomize
+    floatingGameObjects.forEach(alreadyGenObjects => {
+        if (yObj === alreadyGenObjects.y || yObj > 350 || xObj > 400) {
+            yObj = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY)[1];
+        }
+    });
+    return new FloatingObject(xObj, yObj, rad, gameObjectSprite, points);
 };
-let genGemObjects = function () {
-    genFloatingGameObjects(gameUtils.objectSprites.keypic, 5, 4, 40, 10);
-    genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 5, 4, 50, 10);
-    genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10);
-    genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10);
-    gameUtils.arrangeObjectsByY(floatingGameObjects);
-};
+let winKey = genFloatingGameObjects(gameUtils.objectSprites.keypic, 4, 4, 40, 10);
+floatingGameObjects.push(winKey);
+let blueGem = genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 3.5, 4.5, 50, 10);
+floatingGameObjects.push(blueGem);
+let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10);
+floatingGameObjects.push(greenGem);
+// genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
+gameUtils.arrangeObjectsByY(floatingGameObjects);
 class WinningBlock extends GameObject {
     constructor(x, y, radius, sprite, points) {
         super(x, y, radius, sprite, points);
     }
-    checkInventoryForKey() { }
+    checkInventoryForKey() {
+        if (player.inventory.has(winKey)) {
+            this.x = 404;
+            this.y = 40;
+        }
+    }
 }
 ;
-let winPad = new GameObject(404, 40, 40, gameUtils.objectSprites.selector, 10);
+let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 10);
 staticGameObjects.push(winPad);
 // Enemies our player must avoid
 class Enemy {

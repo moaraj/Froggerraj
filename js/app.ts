@@ -45,8 +45,6 @@ class GameUtilities{
 let gameUtils = new GameUtilities(0,1);
 
 
-
-
 // Player must first get the key to unlock door to win the game
 class GameObject {
     x:number;
@@ -110,25 +108,40 @@ class FloatingObject extends GameObject{
 
 
 let playerInventory = [];
-let staticGameObjects: GameObject[] = [];
+let staticGameObjects = [];
 let floatingGameObjects: FloatingObject[] = [];
 
 
-let genFloatingGameObjects = function(gameObjectSprite:string, 
-    spawnLocationX:number, spawnLocationY:number, rad:number, points:number){
+let genFloatingGameObjects = function(
+    gameObjectSprite:string, spawnLocationX:number, spawnLocationY:number, 
+    rad:number, points:number){
+    // Function generates Game objects with random x and y block placements
     let [xObj,yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
-    floatingGameObjects.push(new FloatingObject(xObj, yObj, rad, gameObjectSprite, points));
+
+    // if there is already as object at the same y, re randomize
+    floatingGameObjects.forEach(alreadyGenObjects => {
+        if(yObj === alreadyGenObjects.y || yObj > 350 || xObj > 400){
+            yObj = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY)[1]
+        });
+    
+    return new FloatingObject(xObj, yObj, rad, gameObjectSprite, points);
 };
 
 
-let genGemObjects = function(){
-    genFloatingGameObjects(gameUtils.objectSprites.keypic, 5, 4, 40, 10);
-    genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 5, 4, 50, 10)
-    genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10)
-    genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
-    gameUtils.arrangeObjectsByY(floatingGameObjects)    
-})
 
+
+
+let winKey =  genFloatingGameObjects(gameUtils.objectSprites.keypic, 4, 4, 40, 10);
+floatingGameObjects.push(winKey);
+
+let blueGem = genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 3.5, 4.5, 50, 10)
+floatingGameObjects.push(blueGem);
+
+let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10)
+floatingGameObjects.push(greenGem);
+
+    // genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
+gameUtils.arrangeObjectsByY(floatingGameObjects)
 
 
 
@@ -139,11 +152,15 @@ class WinningBlock extends GameObject {
     constructor(x:number, y:number, radius:number, sprite:string, points:number){
         super(x,y,radius,sprite, points)
     }
-
-    checkInventoryForKey(){   }
+    checkInventoryForKey(){ 
+        if(player.inventory.has(winKey)){
+            this.x = 404;
+            this.y = 40
+        }
+      }
 };
 
-let winPad = new GameObject(404, 40 ,40, gameUtils.objectSprites.selector, 10);
+let winPad = new WinningBlock(1000, 40 ,40, gameUtils.objectSprites.selector, 10);
 staticGameObjects.push(winPad);
 
 
@@ -449,7 +466,6 @@ const updatePlayerHearts = function(){
     });
     hud.appendChild(frag);
 };
-
 
 
 let detectOtherBugs = function () {

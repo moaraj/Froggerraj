@@ -76,6 +76,7 @@ var Engine = (function(global) {
         genCharacterCardDeck();
 
         // Enemies rendered at the start of the game
+        
         gameStartGenEnemies();
         updatePlayerHearts();
     }
@@ -111,6 +112,8 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
 
+        winPad.checkInventoryForKey();
+
         floatingGameObjects.forEach(floatingObject => {
             floatingObject.animateFloat();
             floatingObject.checkPickedUp();
@@ -119,7 +122,7 @@ var Engine = (function(global) {
             if (player.inventory.has(floatingObject)) {
                 floatingObject.moveToInvetory([...player.inventory].indexOf(floatingObject));
             };
-            
+
         })
         
         player.update();
