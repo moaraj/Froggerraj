@@ -42,6 +42,55 @@ class GameUtilities {
 }
 ;
 let gameUtils = new GameUtilities(0, 1);
+let genCharacterCardDeck = function () {
+    //produce divs for carad careds, example given below
+    // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
+    let characterCardDeck = document.getElementById('character-deck');
+    for (const key in gameUtils.characters) {
+        if (key !== 'selected') {
+            const characterCardDiv = document.createElement('div');
+            characterCardDiv.classList.add('character-card');
+            const characterImage = document.createElement('img');
+            characterImage.setAttribute('id', key);
+            characterImage.setAttribute('src', gameUtils.characters[key]);
+            characterCardDiv.appendChild(characterImage);
+            characterCardDeck.appendChild(characterCardDiv);
+        }
+        ;
+    }
+    ;
+};
+let characterDeck = document.getElementById('character-deck');
+if (characterDeck) {
+    characterDeck.addEventListener('click', selectCharacter, false);
+}
+;
+function selectCharacter(event) {
+    if (event.target !== event.currentTarget) {
+        // Clicking on the imag has no last child as it is the last child
+        // This hack extractrs the id attaced to the img that is used as a key for the characters objects
+        let cardElement = event.target;
+        if (event.target.lastChild) {
+            gameUtils.characters.selected = gameUtils.characters[event.target.lastChild.id];
+        }
+        else {
+            gameUtils.characters.selected = gameUtils.characters[event.target.parentElement.lastChild.id];
+            cardElement = event.target.parentElement;
+        }
+        player.sprite = gameUtils.characters.selected;
+        characterDeck.childNodes.forEach(box => {
+            if (cardElement === box) {
+                box.style.background = 'yellow';
+            }
+            else {
+                box.style.background = '#2e3d49';
+            }
+        });
+    }
+    ;
+}
+;
+;
 // Player must first get the key to unlock door to win the game
 class GameObject {
     constructor(x, y, radius, sprite, points) {
@@ -244,41 +293,6 @@ let keyboardInput = (function () {
     });
 })();
 const player = new Player(200, 395, 30, 'images/char-boy.png');
-let genCharacterCardDeck = function () {
-    //produce divs for carad careds, example given below
-    // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
-    let characterCardDeck = document.getElementById('character-deck');
-    for (const key in gameUtils.characters) {
-        if (key !== 'selected') {
-            const characterCardDiv = document.createElement('div');
-            characterCardDiv.classList.add('character-card');
-            const characterImage = document.createElement('img');
-            characterImage.setAttribute('id', key);
-            characterImage.setAttribute('src', gameUtils.characters[key]);
-            characterCardDiv.appendChild(characterImage);
-            characterCardDeck.appendChild(characterCardDiv);
-        }
-        ;
-    }
-    ;
-};
-let characterDeck = document.getElementById('character-deck');
-if (characterDeck) {
-    characterDeck.addEventListener('click', selectCharacter, false);
-}
-function selectCharacter(event) {
-    if (event.target !== event.currentTarget) {
-        // Clicking on the imag has no last child as it is the last child
-        // This hack extractrs the id attaced to the img that is used as a key for the characters objects
-        if (event.target.lastChild) {
-            gameUtils.characters.selected = gameUtils.characters[event.target.lastChild.id];
-        }
-        else {
-            gameUtils.characters.selected = gameUtils.characters[event.target.parentElement.lastChild.id];
-        }
-        player.sprite = gameUtils.characters.selected;
-    }
-}
 function gameStartGenEnemies(difficulty = 1) {
     // Generate Enemies at the start of the game with random speed at all lanes of the game
     for (let index = 0; index < 4; index++) {

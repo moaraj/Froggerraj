@@ -12,15 +12,14 @@
 
 <body>
     <div class="container">
-
-
         <div class="game-screen">
+            
             <h3>Select your hero</h3>
             <div id="character-deck"></div>
 
             <div class="difficulty-box">
                 <h3 class="title">Select difficulty</h3>
-                
+
                 <div>
                     <label data-children-count="1">
                         <input type="radio" class="nes-radio" name="yes" checked="">
@@ -39,12 +38,14 @@
         </div> <!-- Start Screen -->
 
         <div class="game-screen" id="game-screen">
+            
             <div class="hud-status">
                 <progress id="health" class="nes-progress is-error" value="100" max="100"></progress>
             </div>
         </div> <!-- Game Screen -->
 
         <div class="game-screen" id="end-screen">
+            
             <div class="nes-container is-rounded is-dark">
                 <p>Good morning. Thou hast had a good night's sleep, I hope.</p>
             </div>
@@ -55,8 +56,6 @@
             <button type="button" class="nes-btn">Try Again</button>
             <button type="button" class="nes-btn">Play Again</button>
         </div><!-- Eng Screen -->
-        
-
 
     </div> <!-- container -->
     <script src="js/resources.js"></script>
