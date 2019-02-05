@@ -3,7 +3,7 @@ class GameUtilities {
     constructor(points, difficulty) {
         this.points = points;
         this.difficulty = difficulty;
-        this.objectLocations = {
+        this.objectSprites = {
             selector: 'images/Selector.png',
             keypic: 'images/Key.png',
             gemOrage: 'images/GemOrange.png',
@@ -17,6 +17,26 @@ class GameUtilities {
             pinkGirl: 'images/char-pink-girl.png',
             selected: 'images/char-boy.png'
         };
+    }
+    ;
+    randomizeLocation(spawnLocationX, spawnLocationY) {
+        let randX = Math.floor(Math.random() * spawnLocationX) * 101;
+        let randY = Math.floor(Math.random() * spawnLocationY) * 85 + 40;
+        return [randX, randY];
+    }
+    ;
+    arrangeObjectsByY(array) {
+        // Arrange GameObjects according to thier Y position to render properly
+        // Simply sorts the All enemies array by y value in enemy objects
+        array = array.sort((a, b) => {
+            // console.log("sorting: " + a + " " + b)
+            if (a.y > b.y)
+                return 1;
+            else if (a.y < b.y)
+                return -1;
+            else
+                return 0;
+        });
     }
     ;
 }
@@ -33,10 +53,6 @@ class GameObject {
         this.activated = true;
         this.points = points;
     }
-    randomizeLocation(spawnLocationX, spawnLocationY) {
-        this.x = Math.floor(Math.random() * spawnLocationX) * 101;
-        this.y = Math.floor(Math.random() * spawnLocationY) * 85 + 40;
-    }
     checkPickedUp() {
         let InsideRad = Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
         if (InsideRad) {
@@ -46,6 +62,8 @@ class GameObject {
     }
     ;
     moveToInvetory(n) {
+        // Check Inventory will return which index current this oject is in
+        // so it can be appropraitely moved to bottom of screen
         this.x = 100 * n;
         this.y = 535;
     }
@@ -53,6 +71,7 @@ class GameObject {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 }
+;
 class FloatingObject extends GameObject {
     constructor(x, y, radius, sprite, points) {
         super(x, y, radius, sprite, points);
@@ -81,19 +100,29 @@ class FloatingObject extends GameObject {
         this.y = this.y + this.floatDirection;
     }
 }
+let playerInventory = [];
 let staticGameObjects = [];
 let floatingGameObjects = [];
-// let winKey = new FloatingObject(104,120,40,'images/Key.png');
-let winKey = new FloatingObject(104, 380, 40, gameUtils.objectLocations.keypic, 10);
-floatingGameObjects.push(winKey);
-let blueGem = new FloatingObject(204, 280, 40, gameUtils.objectLocations.gemBlue, 10);
-floatingGameObjects.push(blueGem);
-let winPad = new GameObject(404, 40, 40, gameUtils.objectLocations.selector, 10);
+let genFloatingGameObjects = function (gameObjectSprite, spawnLocationX, spawnLocationY, rad, points) {
+    let [xObj, yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
+    floatingGameObjects.push(new FloatingObject(xObj, yObj, rad, gameObjectSprite, points));
+};
+let genGemObjects = function () {
+    genFloatingGameObjects(gameUtils.objectSprites.keypic, 5, 4, 40, 10);
+    genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 5, 4, 50, 10);
+    genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10);
+    genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10);
+    gameUtils.arrangeObjectsByY(floatingGameObjects);
+};
+class WinningBlock extends GameObject {
+    constructor(x, y, radius, sprite, points) {
+        super(x, y, radius, sprite, points);
+    }
+    checkInventoryForKey() { }
+}
+;
+let winPad = new GameObject(404, 40, 40, gameUtils.objectSprites.selector, 10);
 staticGameObjects.push(winPad);
-let playerInventory = [];
-// if(winKey.pickedUp = false ){
-//     winPad.activated = false;
-// } else {winKey.activated = true;}
 // Enemies our player must avoid
 class Enemy {
     constructor(x, y, dt) {
@@ -250,26 +279,12 @@ function gameStartGenEnemies(difficulty = 1) {
 }
 ;
 let allEnemies = [];
-function arrangeEnemiesByY() {
-    // Arrange Bugs according to thier Y position to render properly
-    // Simply sorts the All enemies array by y value in enemy objects
-    allEnemies = allEnemies.sort((a, b) => {
-        // console.log("sorting: " + a + " " + b)
-        if (a.y > b.y)
-            return 1;
-        else if (a.y < b.y)
-            return -1;
-        else
-            return 0;
-    });
-}
-;
 function genEnemies(xInit, yInit, speedInit) {
     // Utility function for creating new enemies
     // Makes new enemy objects and all then to allEnemies array
     let newEnemy = new Enemy(xInit, yInit, speedInit);
     allEnemies.push(newEnemy);
-    arrangeEnemiesByY();
+    gameUtils.arrangeObjectsByY(allEnemies);
 }
 ;
 function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10, maxEnemies = 25) {
@@ -283,7 +298,7 @@ function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10, maxEnemies = 25) {
         let speedInitEnemy = Math.random() * speedMax + 1;
         let newEnemy = new Enemy(-100, yInitEnemy, speedInitEnemy);
         allEnemies.push(newEnemy);
-        arrangeEnemiesByY();
+        gameUtils.arrangeObjectsByY(allEnemies);
     }
     ;
 }

@@ -118,7 +118,8 @@ var Engine = (function(global) {
             
             if (player.inventory.has(floatingObject)) {
                 floatingObject.moveToInvetory([...player.inventory].indexOf(floatingObject));
-            }            
+            };
+            
         })
         
         player.update();
