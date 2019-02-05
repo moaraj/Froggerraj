@@ -1,4 +1,55 @@
 "use strict";
+class gameOptions {
+    constructor(points, difficulty) {
+        this.points = points;
+        this.difficulty = difficulty;
+    }
+    setDifficulty() { }
+}
+// Player must first get the key to unlock door to win the game
+class GameObject {
+    constructor(x, y, radius, sprite) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.sprite = sprite;
+        this.pickedUp = false;
+        this.activated = true;
+    }
+    randomizeLocation() {
+        this.x = Math.floor(Math.random() * 5 + 1) / 80;
+        this.y = Math.floor(Math.random() * 6 + 1) / 80;
+    }
+    render() {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+}
+class FloatingObject extends GameObject {
+    constructor(x, y, radius, sprite) {
+        super(x, y, radius, sprite);
+        this.radius = radius;
+        this.yMax = this.y + 5;
+        this.yMin = this.y - 5;
+        this.floatDirection = 1;
+    }
+    animateFloat() {
+        if (this.y === this.yMax) {
+            this.floatDirection = -0.25;
+        }
+        if (this.y === this.yMin) {
+            this.floatDirection = 0.25;
+        }
+        this.y = this.y + this.floatDirection;
+    }
+}
+let winKey = new FloatingObject(104, 120, 40, 'images/Key.png');
+let winPad = new GameObject(404, 40, 40, 'images/Selector.png');
+if (winKey.pickedUp = false) {
+    winPad.activated = false;
+}
+else {
+    winKey.activated = true;
+}
 // Enemies our player must avoid
 class Enemy {
     constructor(x, y, dt) {
@@ -104,31 +155,43 @@ let characters = {
     pinkGirl: 'images/char-pink-girl.png',
     selected: 'images/char-boy.png'
 };
+let genCharacterCardDeck = function () {
+    //produce divs for carad careds, example given below
+    // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
+    let characterCardDeck = document.getElementById('character-deck');
+    for (const key in characters) {
+        if (key !== 'selected') {
+            const characterCardDiv = document.createElement('div');
+            characterCardDiv.classList.add('character-card');
+            const characterImage = document.createElement('img');
+            characterImage.setAttribute('id', key);
+            characterImage.setAttribute('src', characters[key]);
+            characterCardDiv.appendChild(characterImage);
+            characterCardDeck.appendChild(characterCardDiv);
+        }
+        ;
+    }
+    ;
+};
 let characterDeck = document.getElementById('character-deck');
 if (characterDeck) {
     characterDeck.addEventListener('click', selectCharacter, false);
 }
 function selectCharacter(event) {
     if (event.target !== event.currentTarget) {
+        // Clicking on the imag has no last child as it is the last child
+        // This hack extractrs the id attaced to the img that is used as a key for the characters objects
         if (event.target.lastChild) {
             characters.selected = characters[event.target.lastChild.id];
         }
         else {
-            // console.log(event.target.parentElement.lastChild.id)
             characters.selected = characters[event.target.parentElement.lastChild.id];
         }
         player.sprite = characters.selected;
     }
 }
-class GameOptions {
-    constructor(difficulty, character, score) {
-        this.character = character;
-        this.difficulty = difficulty;
-        this.score = score;
-    }
-    ;
-}
 function gameStartGenEnemies(difficulty = 1) {
+    // Generate Enemies at the start of the game with random speed at all lanes of the game
     for (let index = 0; index < 4; index++) {
         let xInit = index * Math.random() * 400;
         let yInit = index * 80 + 50;
@@ -142,6 +205,7 @@ function gameStartGenEnemies(difficulty = 1) {
 let allEnemies = [];
 function arrangeEnemiesByY() {
     // Arrange Bugs according to thier Y position to render properly
+    // Simply sorts the All enemies array by y value in enemy objects
     allEnemies = allEnemies.sort((a, b) => {
         // console.log("sorting: " + a + " " + b)
         if (a.y > b.y)
@@ -154,13 +218,16 @@ function arrangeEnemiesByY() {
 }
 ;
 function genEnemies(xInit, yInit, speedInit) {
+    // Utility function for creating new enemies
+    // Makes new enemy objects and all then to allEnemies array
     let newEnemy = new Enemy(xInit, yInit, speedInit);
     allEnemies.push(newEnemy);
     arrangeEnemiesByY();
 }
 ;
 function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10, maxEnemies = 25) {
-    // The larger allEnemies Array becomes, the less likely an new enemy will spawn
+    // Generates Enemies with some probablility
+    // The larger allEnemies Array, The more enemies on screen becomes, the less likely an new enemy will spawn
     let genEnemyProb = Math.floor(Math.random() * 100) > prob + allEnemies.length;
     // console.log(prob + allEnemies.length * 2)
     if (genEnemyProb && allEnemies.length < maxEnemies) {
@@ -175,6 +242,7 @@ function genEnemiesProb(yLevels = 4, speedMax = 2, prob = 10, maxEnemies = 25) {
 }
 ;
 function deleteEnemiesProb(prob = 90) {
+    // Deletes Bugs as they move off the screen with some probability
     // The larger allEnemies Array becomes, the more likely an enemy will be deleted
     allEnemies.forEach((bug, index) => {
         if (bug.x > 500 && allEnemies.length > 7) {
@@ -190,6 +258,7 @@ function deleteEnemiesProb(prob = 90) {
 }
 ;
 let detectNearbyEnemies = function (enemyArray, yThresholdTop, yThresholdBottom, xThreshold) {
+    // Collision detection for the player    
     // Check Enemies nearby in Y axis
     let nearbyEnemies = enemyArray.filter(bug => bug.y > player.y + 5 - yThresholdTop).filter(bug => bug.y < player.y + 5 + yThresholdBottom);
     // Check Enemies nearby in X axis
@@ -197,15 +266,18 @@ let detectNearbyEnemies = function (enemyArray, yThresholdTop, yThresholdBottom,
     return nearbyEnemies;
 };
 let collisionDetection = function () {
+    // To reduce bumber of checks, first Enemies in larger radius deteched
+    // then a subset closer to player as determined as colliding
     let nearbyEnemies = detectNearbyEnemies(allEnemies, 50, 50, 100);
     let collidingEnemies = detectNearbyEnemies(nearbyEnemies, 30, 50, 57);
+    // If collision is detected Player health and lives are updated
     if (collidingEnemies.length > 0)
         updatePlayerHealth();
 };
 const updatePlayerHealth = function () {
     // If Collision is deteched player health is reduced
     let health = document.getElementById("health");
-    player.health -= 5;
+    player.health -= 10;
     // If player health is reduced to 0, 1 life is reduced
     if (player.health <= 0) {
         player.x = player.xInit;

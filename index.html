@@ -16,39 +16,33 @@
 
         <div class="game-screen">
             <h3>Select your hero</h3>
-            <div id="character-deck">
-                <div id='boyCard1' class="character-card"><img id="boy" src="./images/char-boy.png"></div>
-                <div id='boyCard2' class="character-card"><img id="catGirl" src="./images/char-cat-girl.png"></div>
-                <div id='boyCard3' class="character-card"><img id="hornGirl" src="./images/char-horn-girl.png"></div>
-                <div id='boyCard4'class="character-card"><img id='pinkGirl' src="./images/char-pink-girl.png"></div>
-                <!-- <div class="character-card"><img src="./images/char-princess-girl.png"></div> -->
-            </div>
+            <div id="character-deck"></div>
 
             <div class="difficulty-box">
                 <h3 class="title">Select difficulty</h3>
+                
                 <div>
                     <label data-children-count="1">
-                        <input type="radio" class="nes-radio" name="answer" checked="">
-                        <span>Easy</span>
+                        <input type="radio" class="nes-radio" name="yes" checked="">
+                        <span>Yes</span>
                     </label>
                     <label data-children-count="1">
                         <input type="radio" class="nes-radio" name="answer">
-                        <span>Hard</span>
+                        <span>No</span>
                     </label>
                 </div>
-            </div>
 
-            <div class="start">
+                <div class="start">
                     <button class="nes-button start-button">Start Game</button>
-            </div>
-        </div>
+                </div>
+            </div> <!-- Difficulty Box -->
+        </div> <!-- Start Screen -->
 
         <div class="game-screen" id="game-screen">
             <div class="hud-status">
                 <progress id="health" class="nes-progress is-error" value="100" max="100"></progress>
             </div>
-
-        </div>
+        </div> <!-- Game Screen -->
 
         <div class="game-screen" id="end-screen">
             <div class="nes-container is-rounded is-dark">
@@ -56,25 +50,18 @@
             </div>
             <div><br><br><br>
 
-
-
             </div>
             <button type="button" class="nes-btn">Change Hero or Difficulty</button>
             <button type="button" class="nes-btn">Try Again</button>
             <button type="button" class="nes-btn">Play Again</button>
-
-        </div>
-
-
-
+        </div><!-- Eng Screen -->
+        
 
 
     </div> <!-- container -->
-
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
 
 </body>
-
 </html>
