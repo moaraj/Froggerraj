@@ -1,55 +1,99 @@
 "use strict";
-class gameOptions {
+class GameUtilities {
     constructor(points, difficulty) {
         this.points = points;
         this.difficulty = difficulty;
+        this.objectLocations = {
+            selector: 'images/Selector.png',
+            keypic: 'images/Key.png',
+            gemOrage: 'images/GemOrange.png',
+            gemGreen: 'images/GemGreen.png',
+            gemBlue: 'images/GemBlue.png'
+        };
+        this.characters = {
+            boy: 'images/char-boy.png',
+            catGirl: 'images/char-cat-girl.png',
+            hornGirl: 'images/char-horn-girl.png',
+            pinkGirl: 'images/char-pink-girl.png',
+            selected: 'images/char-boy.png'
+        };
     }
-    setDifficulty() { }
+    ;
 }
+;
+let gameUtils = new GameUtilities(0, 1);
 // Player must first get the key to unlock door to win the game
 class GameObject {
-    constructor(x, y, radius, sprite) {
+    constructor(x, y, radius, sprite, points) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.sprite = sprite;
         this.pickedUp = false;
         this.activated = true;
+        this.points = points;
     }
-    randomizeLocation() {
-        this.x = Math.floor(Math.random() * 5 + 1) / 80;
-        this.y = Math.floor(Math.random() * 6 + 1) / 80;
+    randomizeLocation(spawnLocationX, spawnLocationY) {
+        this.x = Math.floor(Math.random() * spawnLocationX) * 101;
+        this.y = Math.floor(Math.random() * spawnLocationY) * 85 + 40;
+    }
+    checkPickedUp() {
+        let InsideRad = Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
+        if (InsideRad) {
+            this.pickedUp = true;
+        }
+        ;
+    }
+    ;
+    moveToInvetory() {
+        this.x = 0;
+        this.y = 550;
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 }
 class FloatingObject extends GameObject {
-    constructor(x, y, radius, sprite) {
-        super(x, y, radius, sprite);
+    constructor(x, y, radius, sprite, points) {
+        super(x, y, radius, sprite, points);
         this.radius = radius;
         this.yMax = this.y + 5;
         this.yMin = this.y - 5;
         this.floatDirection = 1;
     }
     animateFloat() {
+        if (this.y > this.yMax) {
+            this.y = this.yMax;
+        }
+        ;
         if (this.y === this.yMax) {
             this.floatDirection = -0.25;
         }
+        ;
+        if (this.y < this.yMin) {
+            this.y = this.yMin;
+        }
+        ;
         if (this.y === this.yMin) {
             this.floatDirection = 0.25;
         }
+        ;
         this.y = this.y + this.floatDirection;
     }
 }
-let winKey = new FloatingObject(104, 120, 40, 'images/Key.png');
-let winPad = new GameObject(404, 40, 40, 'images/Selector.png');
-if (winKey.pickedUp = false) {
-    winPad.activated = false;
-}
-else {
-    winKey.activated = true;
-}
+let staticGameObjects = [];
+let floatingGameObjects = [];
+// let winKey = new FloatingObject(104,120,40,'images/Key.png');
+let winKey = new FloatingObject(104, 380, 40, gameUtils.objectLocations.keypic, 10);
+floatingGameObjects.push(winKey);
+let blueGem = new FloatingObject(204, 280, 40, gameUtils.objectLocations.gemBlue, 10);
+floatingGameObjects.push(blueGem);
+let winPad = new GameObject(404, 40, 40, gameUtils.objectLocations.selector, 10);
+staticGameObjects.push(winPad);
+let playerInventory = [];
+// if(winKey.pickedUp = false ){
+//     winPad.activated = false;
+// } else {winKey.activated = true;}
 // Enemies our player must avoid
 class Enemy {
     constructor(x, y, dt) {
@@ -86,6 +130,7 @@ class Player {
         this.lives = 3;
         this.totalLives = 3;
         this.health = 100;
+        this.inventory = new Set;
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -132,7 +177,16 @@ class Player {
                 startY: 295
             };
         }
+        ;
     }
+    ;
+    addToInvenctory(gameObject) {
+        if (gameObject.pickedUp) {
+            this.inventory.add(gameObject);
+        }
+        ;
+    }
+    ;
 }
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -148,24 +202,17 @@ let keyboardInput = (function () {
     });
 })();
 const player = new Player(200, 395, 30, 'images/char-boy.png');
-let characters = {
-    boy: 'images/char-boy.png',
-    catGirl: 'images/char-cat-girl.png',
-    hornGirl: 'images/char-horn-girl.png',
-    pinkGirl: 'images/char-pink-girl.png',
-    selected: 'images/char-boy.png'
-};
 let genCharacterCardDeck = function () {
     //produce divs for carad careds, example given below
     // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
     let characterCardDeck = document.getElementById('character-deck');
-    for (const key in characters) {
+    for (const key in gameUtils.characters) {
         if (key !== 'selected') {
             const characterCardDiv = document.createElement('div');
             characterCardDiv.classList.add('character-card');
             const characterImage = document.createElement('img');
             characterImage.setAttribute('id', key);
-            characterImage.setAttribute('src', characters[key]);
+            characterImage.setAttribute('src', gameUtils.characters[key]);
             characterCardDiv.appendChild(characterImage);
             characterCardDeck.appendChild(characterCardDiv);
         }
@@ -182,12 +229,12 @@ function selectCharacter(event) {
         // Clicking on the imag has no last child as it is the last child
         // This hack extractrs the id attaced to the img that is used as a key for the characters objects
         if (event.target.lastChild) {
-            characters.selected = characters[event.target.lastChild.id];
+            gameUtils.characters.selected = gameUtils.characters[event.target.lastChild.id];
         }
         else {
-            characters.selected = characters[event.target.parentElement.lastChild.id];
+            gameUtils.characters.selected = gameUtils.characters[event.target.parentElement.lastChild.id];
         }
-        player.sprite = characters.selected;
+        player.sprite = gameUtils.characters.selected;
     }
 }
 function gameStartGenEnemies(difficulty = 1) {

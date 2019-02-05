@@ -1,13 +1,32 @@
-class gameOptions{
-    points:number
-    difficulty:number
+class GameUtilities{
+    points:number;
+    difficulty:number;
+    objectLocations: {};
+    characters:{};
 
     constructor(points:number, difficulty:number){
         this.points = points
         this.difficulty = difficulty
-    }
-    setDifficulty(){    }
-}
+        this.objectLocations = {
+            selector:'images/Selector.png',
+            keypic:'images/Key.png',
+            gemOrage:'images/GemOrange.png',
+            gemGreen:'images/GemGreen.png',
+            gemBlue:'images/GemBlue.png'}
+
+        this.characters  = {
+            boy:'images/char-boy.png',
+            catGirl: 'images/char-cat-girl.png',
+            hornGirl: 'images/char-horn-girl.png',
+            pinkGirl: 'images/char-pink-girl.png',
+            selected: 'images/char-boy.png'
+        }
+    };
+};
+
+let gameUtils = new GameUtilities(0,1);
+
+
 
 
 // Player must first get the key to unlock door to win the game
@@ -15,25 +34,42 @@ class GameObject {
     x:number;
     y:number;
     radius:number
+    scale:number;
     sprite:string;
     activated:boolean;
     pickedUp:boolean;
+    points:number;
+    
 
-    constructor(x:number, y:number, radius:number,sprite:string){
+    constructor(x:number, y:number, radius:number,sprite:string, points:number){
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.sprite = sprite;
         this.pickedUp = false;
         this.activated = true;
-    }
-    randomizeLocation(){
-        this.x = Math.floor(Math.random() * 5 + 1) / 80;
-        this.y = Math.floor( Math.random() * 6  + 1) / 80;
+        this.points = points;
     }
 
-    render() {    
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    randomizeLocation(spawnLocationX:number, spawnLocationY:number){
+        this.x = Math.floor(Math.random() * spawnLocationX) * 101;
+        this.y = Math.floor( Math.random() * spawnLocationY) * 85 + 40;
+    }
+
+    checkPickedUp(){
+        let InsideRad = Math.sqrt( (player.x - this.x)**2 + (player.y - this.y)**2 ) < this.radius;
+        if (InsideRad) { this.pickedUp = true};
+    };
+
+    moveToInvetory(){
+        this.x = 0;
+        this.y = 550;
+    }
+
+    render() {
+        
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);     
+
     }
 }
 
@@ -42,8 +78,8 @@ class FloatingObject extends GameObject{
     yMin:number;
     floatDirection: number; 
 
-    constructor(x:number, y:number, radius:number, sprite:string){
-        super(x, y, radius ,sprite);
+    constructor(x:number, y:number, radius:number, sprite:string, points:number){
+        super(x, y, radius ,sprite, points);
         this.radius = radius;
         this.yMax = this.y + 5;
         this.yMin = this.y - 5;
@@ -51,20 +87,39 @@ class FloatingObject extends GameObject{
     }
 
     animateFloat(){
-        if(this.y === this.yMax){this.floatDirection = -0.25} 
-        if(this.y === this.yMin){this.floatDirection = 0.25}
+        if(this.y > this.yMax){this.y = this.yMax};
+        if(this.y === this.yMax){this.floatDirection = -0.25} ;
+
+        if(this.y < this.yMin){this.y = this.yMin};
+        if(this.y === this.yMin){this.floatDirection = 0.25};
         this.y = this.y + this.floatDirection;
     }
-
-    
 }
 
-let winKey = new FloatingObject(104,120,40,'images/Key.png');
-let winPad = new GameObject(404, 40 ,40,'images/Selector.png')
+let staticGameObjects = [];
+let floatingGameObjects = [];
 
-if(winKey.pickedUp = false ){
-    winPad.activated = false;
-} else {winKey.activated = true;}
+
+// let winKey = new FloatingObject(104,120,40,'images/Key.png');
+let winKey = new FloatingObject(104,380,40, gameUtils.objectLocations.keypic , 10);
+floatingGameObjects.push(winKey);
+
+let blueGem = new FloatingObject(204,280,40, gameUtils.objectLocations.gemBlue , 10);
+floatingGameObjects.push(blueGem);
+
+
+let winPad = new GameObject(404, 40 ,40, gameUtils.objectLocations.selector, 10);
+staticGameObjects.push(winPad);
+
+
+let playerInventory = [];
+
+
+
+
+// if(winKey.pickedUp = false ){
+//     winPad.activated = false;
+// } else {winKey.activated = true;}
 
 
 
@@ -114,7 +169,8 @@ class Player {
     win: boolean;
     lives: number;
     totalLives: number;
-    health: number
+    health: number;
+    inventory:Set<FloatingObject>;
 
     constructor(x: number, y: number, speed: number, sprite: string) {
         this.x = x;
@@ -127,6 +183,7 @@ class Player {
         this.lives = 3;
         this.totalLives = 3;
         this.health = 100;
+        this.inventory = new Set;
     }
 
     render() {
@@ -176,9 +233,15 @@ class Player {
             win: true,
                 startX: 200,
                 startY: 295
-            }
-        }
-    }
+            };
+        };
+    };
+
+    addToInvenctory(gameObject:FloatingObject){
+        if(gameObject.pickedUp){
+            this.inventory.add(gameObject);
+        };
+    };
 }
 
 
@@ -201,25 +264,19 @@ let keyboardInput = (function(){
 const player = new Player(200,395,30, 'images/char-boy.png');
 
 
-let characters = {
-    boy:'images/char-boy.png',
-    catGirl: 'images/char-cat-girl.png',
-    hornGirl: 'images/char-horn-girl.png',
-    pinkGirl: 'images/char-pink-girl.png',
-    selected: 'images/char-boy.png'
-}
+
 
 let genCharacterCardDeck = function(){
         //produce divs for carad careds, example given below
     // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
     let characterCardDeck = document.getElementById('character-deck');
-    for (const key in characters) {
+    for (const key in gameUtils.characters) {
         if (key !== 'selected') {
             const characterCardDiv = document.createElement('div');
             characterCardDiv.classList.add('character-card');
             const characterImage = document.createElement('img');
             characterImage.setAttribute('id', key);
-            characterImage.setAttribute('src', characters[key]);
+            characterImage.setAttribute('src', gameUtils.characters[key]);
             characterCardDiv.appendChild(characterImage);
             characterCardDeck.appendChild(characterCardDiv);
         };
@@ -238,12 +295,12 @@ function selectCharacter(event) {
         // Clicking on the imag has no last child as it is the last child
         // This hack extractrs the id attaced to the img that is used as a key for the characters objects
         if (event.target.lastChild) {
-        characters.selected = characters[event.target.lastChild.id] ;
+        gameUtils.characters.selected = gameUtils.characters[event.target.lastChild.id] ;
         } else {
-        characters.selected = characters[event.target.parentElement.lastChild.id];
+        gameUtils.characters.selected = gameUtils.characters[event.target.parentElement.lastChild.id];
         }
         
-        player.sprite = characters.selected;
+        player.sprite = gameUtils.characters.selected;
     }
 }
 

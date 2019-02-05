@@ -25,7 +25,7 @@ var Engine = (function(global) {
         lastTime;
 
     canvas.width = 505;
-    canvas.height = 606;
+    canvas.height = 700;
     // doc.body.appendChild(canvas);
     let gameArea = document.getElementById("game-screen")
     canvas.setAttribute("id", "gameCanvas")
@@ -90,11 +90,12 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+
         deleteEnemiesProb();
-        
         updateEntities(dt);
         collisionDetection();
         detectOtherBugs();
+
     }
 
     /* This is called by the update function and loops through all of the
@@ -105,10 +106,17 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        winKey.animateFloat();
+        
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
+
+        floatingGameObjects.forEach(floatingObject => {
+            floatingObject.animateFloat();
+            floatingObject.checkPickedUp();
+            player.addToInvenctory(floatingObject);
+            if (player.inventory.has(floatingObject)) {floatingObject.moveToInvetory()}            
+        })
         
         player.update();
     }
@@ -157,6 +165,7 @@ var Engine = (function(global) {
 
         renderEntities();
     }
+    
 
     /* This function is called by the render function and is called on each game
      * tick. Its purpose is to then call the render functions you have defined
@@ -166,11 +175,19 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        winPad.render();
-        allEnemies.forEach(function(enemy) {
+        
+        staticGameObjects.forEach(staticGameObjects => {
+            staticGameObjects.render()
+        });
+        
+         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
-        winKey.render();
+
+        floatingGameObjects.forEach(floatingObject => {
+            floatingObject.render()
+        });
+        
         player.render();
     }
 
@@ -186,6 +203,7 @@ var Engine = (function(global) {
      * draw our game level. Then set init as the callback method, so that when
      * all of these images are properly loaded our game will start.
      */
+    
     Resources.load([
         'images/stone-block.png',
         'images/water-block.png',
@@ -195,9 +213,13 @@ var Engine = (function(global) {
         'images/char-cat-girl.png',
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
+        'images/FroggerSml.png',
+
         'images/Selector.png',
         'images/Key.png',
-        'images/FroggerSml.png'
+        'images/GemOrange.png',
+        'images/GemGreen.png',
+        'images/GemBlue.png',
     ]);
     Resources.onReady(init);
 
