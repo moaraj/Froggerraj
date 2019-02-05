@@ -61,9 +61,9 @@ class GameObject {
         if (InsideRad) { this.pickedUp = true};
     };
 
-    moveToInvetory(){
-        this.x = 0;
-        this.y = 550;
+    moveToInvetory(n){
+        this.x = 100 * n;
+        this.y = 535;
     }
 
     render() {

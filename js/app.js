@@ -45,9 +45,9 @@ class GameObject {
         ;
     }
     ;
-    moveToInvetory() {
-        this.x = 0;
-        this.y = 550;
+    moveToInvetory(n) {
+        this.x = 100 * n;
+        this.y = 535;
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);

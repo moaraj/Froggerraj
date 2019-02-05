@@ -115,7 +115,10 @@ var Engine = (function(global) {
             floatingObject.animateFloat();
             floatingObject.checkPickedUp();
             player.addToInvenctory(floatingObject);
-            if (player.inventory.has(floatingObject)) {floatingObject.moveToInvetory()}            
+            
+            if (player.inventory.has(floatingObject)) {
+                floatingObject.moveToInvetory([...player.inventory].indexOf(floatingObject));
+            }            
         })
         
         player.update();
