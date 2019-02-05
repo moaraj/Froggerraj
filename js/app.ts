@@ -3,6 +3,7 @@ class GameUtilities{
     difficulty:number;
     objectSprites: {};
     characters:{};
+    characterPicked:boolean;
 
     constructor(points:number, difficulty:number){
         this.points = points
@@ -21,6 +22,7 @@ class GameUtilities{
             pinkGirl: 'images/char-pink-girl.png',
             selected: 'images/char-boy.png'
         }
+        this.characterPicked = false
     };
 
     randomizeLocation(spawnLocationX:number, spawnLocationY:number){
@@ -68,9 +70,6 @@ if (characterDeck) {
 characterDeck.addEventListener('click', selectCharacter, false);        
 };
 
-
-
-
 function selectCharacter(event) {
 if (event.target !== event.currentTarget) {
     // Clicking on the imag has no last child as it is the last child
@@ -84,16 +83,27 @@ if (event.target !== event.currentTarget) {
     cardElement = event.target.parentElement;
     }
     player.sprite = gameUtils.characters.selected;
+    gameUtils.characterPicked = true;
     
-    characterDeck.childNodes.forEach (box => {
-        if (cardElement === box) {
-            box.style.background = 'yellow';
-        } else { box.style.background = '#2e3d49'}
-    })
-
+    characterDeck.childNodes.forEach(box => {
+        if (cardElement === box) box.style.background = 'yellow';
+        else if box.style.background = '#2e3d49'
     });
     };
 };
+
+
+let StartGameButton = document.getElementsByClassName('start-button')
+StartGameButton.item(0).addEventListener('click', startGame, false);
+
+function startGame(event){
+    console.log('start game button')
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+    }
+};
+
 
 
 // Player must first get the key to unlock door to win the game
@@ -157,6 +167,29 @@ class FloatingObject extends GameObject{
     }
 }
 
+// Winning block which is generated after key is picked up
+
+class WinningBlock extends GameObject {
+    constructor(x:number, y:number, radius:number, sprite:string, points:number){
+        super(x,y,radius,sprite, points)
+        this.radius = 10;
+    }
+    checkInventoryForKey(){ 
+        if(player.inventory.has(winKey)){
+            this.x = 404;
+            this.y = 40
+            player.hasKey = true;
+        }
+      };
+
+      checkWin(){
+        let insideBlock = Math.sqrt( (player.x - this.x)**2 + (player.y - this.y)**2 ) < this.radius;
+        if ( player.hasKey && insideBlock) {
+            player.win = true;
+            gameWin();
+        }
+      };
+};
 
 let playerInventory = [];
 let staticGameObjects = [];
@@ -194,18 +227,6 @@ gameUtils.arrangeObjectsByY(floatingGameObjects)
 
 
 
-
-class WinningBlock extends GameObject {
-    constructor(x:number, y:number, radius:number, sprite:string, points:number){
-        super(x,y,radius,sprite, points)
-    }
-    checkInventoryForKey(){ 
-        if(player.inventory.has(winKey)){
-            this.x = 404;
-            this.y = 40
-        }
-      }
-};
 
 let winPad = new WinningBlock(1000, 40 ,40, gameUtils.objectSprites.selector, 10);
 staticGameObjects.push(winPad);
@@ -255,9 +276,11 @@ class Player {
     speed: number;
     sprite: string;
     win: boolean;
+    hasKey: boolean;
     lives: number;
     totalLives: number;
     health: number;
+    isDead: boolean;
     inventory:Set<FloatingObject>;
 
     constructor(x: number, y: number, speed: number, sprite: string) {
@@ -266,12 +289,14 @@ class Player {
         this.xInit = x;
         this.yInit = y;
         this.speed = speed;
-        this.win = false;
         this.sprite = sprite;
+        this.win = false;
+        this.hasKey = false;
         this.lives = 3;
         this.totalLives = 3;
         this.health = 100;
         this.inventory = new Set;
+        this.isDead = false;
     }
 
     render() {
@@ -435,11 +460,17 @@ const updatePlayerHealth = function(){
         player.y = player.yInit;
         player.health += 100;
         player.lives -= 1;
-        updatePlayerHearts();
-        
+        updatePlayerHearts();        
     };
+
     health.value = player.health;
+
+    if(player.lives === 0 ){
+        player.isDead = true;
+        gameFinish();
+    }
 };
+
 
 const updatePlayerHearts = function(){
     // This function adds 3 hearts div to hud
@@ -448,13 +479,17 @@ const updatePlayerHearts = function(){
 
     let hud = document.getElementsByClassName('hud-status').item(0);
 
+    // Each Frame we remove the heart and re add the appropriate amount
     if(document.getElementById('health-heart')){
         hud.removeChild(hud.lastElementChild);
     }
     
+    // generate fragment with hearts
     let frag = document.createElement('div');
     frag.setAttribute('id', 'health-heart');
 
+    // Interates for over total lives the player started with
+    // if current lives is less, empty hearts are appeneded
     let range = [...Array(player.totalLives).keys()];
     range.forEach(index => {
         let heart = document.createElement('i')
@@ -465,9 +500,28 @@ const updatePlayerHearts = function(){
         }
         frag.appendChild(heart);
     });
+
+    //Append the heart fragment to HUD 
     hud.appendChild(frag);
 };
 
+const gameFinish = function(){
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('end-screen').style.display = 'flex';
+    
+    if (player.isDead) {
+        document.getElementById('end-screen-text').innerText = 
+            "Your hero has fallen. Prehaps he shall rise again after a good night's rest.";
+    } else {
+        document.getElementById('end-screen-text').innerText = 
+            "Your hero is vicotrious. thou shalt live like a king";
+    }
+}
+
+const gameWin = function(){
+    allEnemies.forEach(enemy => enemy.dt = 0);
+    setTimeout(gameFinish, 2000);
+}
 
 let detectOtherBugs = function () {
     // Figure out which bugs have bugs in the same lane
@@ -485,6 +539,26 @@ let detectOtherBugs = function () {
 
 
 
+
+    let playAgainButton = document.getElementById('play-again-button');
+    playAgainButton.addEventListener('click', playAgain , false);
+
+
+
+    let ChangeHeroButton = document.getElementById('change-hero-button');
+    playAgainButton.addEventListener('click', changeHero , false);
+    
+    
+    
+    function startGame(event){
+        console.log('start game button')
+        if (gameUtils.characterPicked) {
+            document.getElementById('intro-page').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+        }
+    };
+    
+    
 
 
 

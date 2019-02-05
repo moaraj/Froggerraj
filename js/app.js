@@ -17,6 +17,7 @@ class GameUtilities {
             pinkGirl: 'images/char-pink-girl.png',
             selected: 'images/char-boy.png'
         };
+        this.characterPicked = false;
     }
     ;
     randomizeLocation(spawnLocationX, spawnLocationY) {
@@ -78,18 +79,26 @@ function selectCharacter(event) {
             cardElement = event.target.parentElement;
         }
         player.sprite = gameUtils.characters.selected;
+        gameUtils.characterPicked = true;
         characterDeck.childNodes.forEach(box => {
-            if (cardElement === box) {
+            if (cardElement === box)
                 box.style.background = 'yellow';
-            }
-            else {
-                box.style.background = '#2e3d49';
-            }
+            else if (box.style.background = '#2e3d49')
+                ;
         });
     }
     ;
 }
 ;
+let StartGameButton = document.getElementsByClassName('start-button');
+StartGameButton.item(0).addEventListener('click', startGame, false);
+function startGame(event) {
+    console.log('start game button');
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+    }
+}
 ;
 // Player must first get the key to unlock door to win the game
 class GameObject {
@@ -149,6 +158,30 @@ class FloatingObject extends GameObject {
         this.y = this.y + this.floatDirection;
     }
 }
+// Winning block which is generated after key is picked up
+class WinningBlock extends GameObject {
+    constructor(x, y, radius, sprite, points) {
+        super(x, y, radius, sprite, points);
+        this.radius = 10;
+    }
+    checkInventoryForKey() {
+        if (player.inventory.has(winKey)) {
+            this.x = 404;
+            this.y = 40;
+            player.hasKey = true;
+        }
+    }
+    ;
+    checkWin() {
+        let insideBlock = Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
+        if (player.hasKey && insideBlock) {
+            player.win = true;
+            gameWin();
+        }
+    }
+    ;
+}
+;
 let playerInventory = [];
 let staticGameObjects = [];
 let floatingGameObjects = [];
@@ -171,18 +204,6 @@ let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50
 floatingGameObjects.push(greenGem);
 // genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
 gameUtils.arrangeObjectsByY(floatingGameObjects);
-class WinningBlock extends GameObject {
-    constructor(x, y, radius, sprite, points) {
-        super(x, y, radius, sprite, points);
-    }
-    checkInventoryForKey() {
-        if (player.inventory.has(winKey)) {
-            this.x = 404;
-            this.y = 40;
-        }
-    }
-}
-;
 let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 10);
 staticGameObjects.push(winPad);
 // Enemies our player must avoid
@@ -216,12 +237,14 @@ class Player {
         this.xInit = x;
         this.yInit = y;
         this.speed = speed;
-        this.win = false;
         this.sprite = sprite;
+        this.win = false;
+        this.hasKey = false;
         this.lives = 3;
         this.totalLives = 3;
         this.health = 100;
         this.inventory = new Set;
+        this.isDead = false;
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -377,17 +400,25 @@ const updatePlayerHealth = function () {
     }
     ;
     health.value = player.health;
+    if (player.lives === 0) {
+        player.isDead = true;
+        gameFinish();
+    }
 };
 const updatePlayerHearts = function () {
     // This function adds 3 hearts div to hud
     // it checks if its there, deletes and regenerarets
     // heart acoording to number lives vs. total lives in player objects
     let hud = document.getElementsByClassName('hud-status').item(0);
+    // Each Frame we remove the heart and re add the appropriate amount
     if (document.getElementById('health-heart')) {
         hud.removeChild(hud.lastElementChild);
     }
+    // generate fragment with hearts
     let frag = document.createElement('div');
     frag.setAttribute('id', 'health-heart');
+    // Interates for over total lives the player started with
+    // if current lives is less, empty hearts are appeneded
     let range = [...Array(player.totalLives).keys()];
     range.forEach(index => {
         let heart = document.createElement('i');
@@ -399,7 +430,24 @@ const updatePlayerHearts = function () {
         }
         frag.appendChild(heart);
     });
+    //Append the heart fragment to HUD 
     hud.appendChild(frag);
+};
+const gameFinish = function () {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('end-screen').style.display = 'flex';
+    if (player.isDead) {
+        document.getElementById('end-screen-text').innerText =
+            "Your hero has fallen. Prehaps he shall rise again after a good night's rest.";
+    }
+    else {
+        document.getElementById('end-screen-text').innerText =
+            "Your hero is vicotrious. thou shalt live like a king";
+    }
+};
+const gameWin = function () {
+    allEnemies.forEach(enemy => enemy.dt = 0);
+    setTimeout(gameFinish, 2000);
 };
 let detectOtherBugs = function () {
     // Figure out which bugs have bugs in the same lane
@@ -414,3 +462,15 @@ let detectOtherBugs = function () {
         });
     });
 };
+let playAgainButton = document.getElementById('play-again-button');
+playAgainButton.addEventListener('click', playAgain, false);
+let ChangeHeroButton = document.getElementById('change-hero-button');
+playAgainButton.addEventListener('click', changeHero, false);
+function startGame(event) {
+    console.log('start game button');
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+    }
+}
+;

@@ -12,7 +12,7 @@
 
 <body>
     <div class="container">
-        <div class="game-screen">
+        <div class="game-screen" id="intro-page">
             
             <h3>Select your hero</h3>
             <div id="character-deck"></div>
@@ -23,11 +23,11 @@
                 <div>
                     <label data-children-count="1">
                         <input type="radio" class="nes-radio" name="yes" checked="">
-                        <span>Yes</span>
+                        <span>Easy</span>
                     </label>
                     <label data-children-count="1">
                         <input type="radio" class="nes-radio" name="answer">
-                        <span>No</span>
+                        <span>Hard</span>
                     </label>
                 </div>
 
@@ -47,14 +47,14 @@
         <div class="game-screen" id="end-screen">
             
             <div class="nes-container is-rounded is-dark">
-                <p>Good morning. Thou hast had a good night's sleep, I hope.</p>
+                <p id="end-screen-text"></p>
             </div>
-            <div><br><br><br>
+            <div><br><br><br><br>
 
             </div>
-            <button type="button" class="nes-btn">Change Hero or Difficulty</button>
-            <button type="button" class="nes-btn">Try Again</button>
-            <button type="button" class="nes-btn">Play Again</button>
+            <button type="button" id="play-again-button" class="nes-btn">Play Again</button>
+            <br>
+            <button type="button" id="change-hero-button" class="nes-btn">Change Hero or Difficulty</button>
         </div><!-- Eng Screen -->
 
     </div> <!-- container -->

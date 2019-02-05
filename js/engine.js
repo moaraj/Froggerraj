@@ -113,6 +113,7 @@ var Engine = (function(global) {
         });
 
         winPad.checkInventoryForKey();
+        winPad.checkWin();
 
         floatingGameObjects.forEach(floatingObject => {
             floatingObject.animateFloat();
