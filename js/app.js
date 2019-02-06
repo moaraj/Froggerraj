@@ -90,21 +90,16 @@ function selectCharacter(event) {
     ;
 }
 ;
-let StartGameButton = document.getElementsByClassName('start-button');
-StartGameButton.item(0).addEventListener('click', startGame, false);
-function startGame(event) {
-    console.log('start game button');
-    if (gameUtils.characterPicked) {
-        document.getElementById('intro-page').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'flex';
-    }
-}
-;
+let playerInventory = [];
+let staticGameObjects = [];
+let floatingGameObjects = [];
 // Player must first get the key to unlock door to win the game
 class GameObject {
     constructor(x, y, radius, sprite, points) {
         this.x = x;
         this.y = y;
+        this.xInit = x;
+        this.yInit = y;
         this.radius = radius;
         this.sprite = sprite;
         this.pickedUp = false;
@@ -133,6 +128,8 @@ class GameObject {
 class FloatingObject extends GameObject {
     constructor(x, y, radius, sprite, points) {
         super(x, y, radius, sprite, points);
+        this.xInit = x;
+        this.yInit = y;
         this.radius = radius;
         this.yMax = this.y + 5;
         this.yMin = this.y - 5;
@@ -182,9 +179,8 @@ class WinningBlock extends GameObject {
     ;
 }
 ;
-let playerInventory = [];
-let staticGameObjects = [];
-let floatingGameObjects = [];
+let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 20);
+staticGameObjects.push(winPad);
 let genFloatingGameObjects = function (gameObjectSprite, spawnLocationX, spawnLocationY, rad, points) {
     // Function generates Game objects with random x and y block placements
     let [xObj, yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
@@ -198,19 +194,19 @@ let genFloatingGameObjects = function (gameObjectSprite, spawnLocationX, spawnLo
 };
 let winKey = genFloatingGameObjects(gameUtils.objectSprites.keypic, 4, 4, 40, 10);
 floatingGameObjects.push(winKey);
-let blueGem = genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 3.5, 4.5, 50, 10);
+let blueGem = genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 3.5, 4.5, 55, 10);
 floatingGameObjects.push(blueGem);
-let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 50, 10);
+let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 55, 10);
 floatingGameObjects.push(greenGem);
 // genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
 gameUtils.arrangeObjectsByY(floatingGameObjects);
-let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 10);
-staticGameObjects.push(winPad);
 // Enemies our player must avoid
 class Enemy {
     constructor(x, y, dt) {
         this.x = x;
         this.y = y;
+        this.xInit = x;
+        this.yInit = y;
         this.dt = dt;
         this.dtInitial = dt;
         this.sprite = 'images/enemy-bug.png';
@@ -294,6 +290,10 @@ class Player {
         ;
     }
     ;
+    reset() {
+        this.x = this.xInit;
+        this.y = this.xInit;
+    }
     addToInvenctory(gameObject) {
         if (gameObject.pickedUp) {
             this.inventory.add(gameObject);
@@ -403,6 +403,7 @@ const updatePlayerHealth = function () {
     if (player.lives === 0) {
         player.isDead = true;
         gameFinish();
+        resetGame();
     }
 };
 const updatePlayerHearts = function () {
@@ -442,7 +443,7 @@ const gameFinish = function () {
     }
     else {
         document.getElementById('end-screen-text').innerText =
-            "Your hero is vicotrious. thou shalt live like a king";
+            "Your hero is vicotrious. Thou shalt live like a king";
     }
 };
 const gameWin = function () {
@@ -462,15 +463,56 @@ let detectOtherBugs = function () {
         });
     });
 };
+let StartGameButton = document.getElementsByClassName('start-button').item(0);
+StartGameButton.addEventListener('click', startGame, false);
 let playAgainButton = document.getElementById('play-again-button');
 playAgainButton.addEventListener('click', playAgain, false);
 let ChangeHeroButton = document.getElementById('change-hero-button');
-playAgainButton.addEventListener('click', changeHero, false);
+ChangeHeroButton.addEventListener('click', changeHero, false);
 function startGame(event) {
-    console.log('start game button');
     if (gameUtils.characterPicked) {
         document.getElementById('intro-page').style.display = 'none';
         document.getElementById('game-screen').style.display = 'flex';
+        document.getElementById('end-screen').style.display = 'none';
     }
 }
 ;
+function playAgain(event) {
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+        document.getElementById('end-screen').style.display = 'none';
+    }
+    ;
+    resetGame();
+}
+;
+function changeHero(event) {
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+        document.getElementById('end-screen').style.display = 'none';
+    }
+    ;
+}
+;
+function resetGame() {
+    debugger;
+    allEnemies = allEnemies.splice(0, 10);
+    allEnemies.forEach(bug => {
+        bug.x = bug.xInit;
+        bug.y = bug.yInit;
+        bug.dt = bug.dtInitial;
+    });
+    player.reset();
+    player.lives = player.totalLives;
+    player.health = 100;
+    player.inventory.clear();
+    player.isDead = false;
+    player.hasKey = false;
+    player.win = false;
+    floatingGameObjects.forEach(item => {
+        item.x = item.xInit;
+        item.y = item.yInit;
+    });
+}
