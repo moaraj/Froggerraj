@@ -26,7 +26,7 @@ var Engine = (function(global) {
 
     canvas.width = 505;
     canvas.height = 700;
-    // doc.body.appendChild(canvas);
+    
     let gameArea = document.getElementById("game-screen")
     canvas.setAttribute("id", "gameCanvas")
     gameArea.appendChild(canvas);
@@ -96,6 +96,7 @@ var Engine = (function(global) {
         updateEntities(dt);
         collisionDetection();
         detectOtherBugs();
+        updatePlayerHearts();
 
     }
 
@@ -117,15 +118,13 @@ var Engine = (function(global) {
 
         floatingGameObjects.forEach(floatingObject => {
             floatingObject.animateFloat();
+            // Check if the player is close and has picked up the object 
+            // Object added to player.inventory
             floatingObject.checkPickedUp();
-            player.addToInvenctory(floatingObject);
-            
-            if (player.inventory.has(floatingObject)) {
-                floatingObject.moveToInvetory([...player.inventory].indexOf(floatingObject));
-            };
-
+            floatingObject.renderInventory();
         })
-        
+
+        // Render inventory
         player.update();
     }
 

@@ -21,14 +21,20 @@ class GameUtilities {
     }
     ;
     randomizeLocation(spawnLocationX, spawnLocationY) {
+        // This funciton randomizes the locaiton of an object its called on
+        // spawnLocationX, spawnLocationX are number from 1 to n - blocks in the x or y direction
+        // the object will be spawned at the center of one of the block in range
+        // the gem and key objects 
         let randX = Math.floor(Math.random() * spawnLocationX) * 101;
         let randY = Math.floor(Math.random() * spawnLocationY) * 85 + 40;
         return [randX, randY];
     }
     ;
     arrangeObjectsByY(array) {
-        // Arrange GameObjects according to thier Y position to render properly
-        // Simply sorts the All enemies array by y value in enemy objects
+        // Arrange GameObjects according to thier Y position to render 
+        // objects in the lower blocks after objects in upper block
+        // to give the prober depth apprance
+        // sorts the All enemies array by y value in enemy objects
         array = array.sort((a, b) => {
             // console.log("sorting: " + a + " " + b)
             if (a.y > b.y)
@@ -44,7 +50,7 @@ class GameUtilities {
 ;
 let gameUtils = new GameUtilities(0, 1);
 let genCharacterCardDeck = function () {
-    //produce divs for carad careds, example given below
+    //produce divs for character cards, example given below
     // <div class="character-card"><img id="boy" src="./images/char-boy.png"></div>
     let characterCardDeck = document.getElementById('character-deck');
     for (const key in gameUtils.characters) {
@@ -66,10 +72,22 @@ if (characterDeck) {
     characterDeck.addEventListener('click', selectCharacter, false);
 }
 ;
+function changeCharCardColor(cardElement) {
+    // when change the background color of the character that is clicked on
+    characterDeck.childNodes.forEach(box => {
+        if (cardElement === box)
+            box.style.background = 'yellow';
+        else if (box.style.background = '#2e3d49')
+            ;
+    });
+}
 function selectCharacter(event) {
+    // Function for selecting characer and animating the yellow 
+    // background card for the chosen character
     if (event.target !== event.currentTarget) {
         // Clicking on the imag has no last child as it is the last child
         // This hack extractrs the id attaced to the img that is used as a key for the characters objects
+        // cardElement - string, each character sprite has an id, this id is used as a key for the characters objects in gameUtils
         let cardElement = event.target;
         if (event.target.lastChild) {
             gameUtils.characters.selected = gameUtils.characters[event.target.lastChild.id];
@@ -80,12 +98,7 @@ function selectCharacter(event) {
         }
         player.sprite = gameUtils.characters.selected;
         gameUtils.characterPicked = true;
-        characterDeck.childNodes.forEach(box => {
-            if (cardElement === box)
-                box.style.background = 'yellow';
-            else if (box.style.background = '#2e3d49')
-                ;
-        });
+        changeCharCardColor(cardElement);
     }
     ;
 }
@@ -105,20 +118,27 @@ class GameObject {
         this.pickedUp = false;
         this.activated = true;
         this.points = points;
+        this.inventoryIndex = undefined;
+    }
+    insideRad() {
+        // Method to check if player is within certain radius of object
+        // if yes, object is added to player inventory set
+        return Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
     }
     checkPickedUp() {
-        let InsideRad = Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
-        if (InsideRad) {
-            this.pickedUp = true;
+        // If the items is withing pickup radius for the player AND is not already in the inventory
+        if (this.insideRad() && !player.inventory.has(this)) {
+            player.inventory.add(this);
+            this.inventoryIndex = player.inventory.size;
         }
-        ;
     }
     ;
-    moveToInvetory(n) {
-        // Check Inventory will return which index current this oject is in
-        // so it can be appropraitely moved to bottom of screen
-        this.x = 100 * n;
-        this.y = 535;
+    renderInventory() {
+        if (player.inventory.has(this)) {
+            // check size of player inventory to move object to bottom of screen without overlap
+            this.x = 100 * this.inventoryIndex;
+            this.y = 535;
+        }
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -136,32 +156,54 @@ class FloatingObject extends GameObject {
         this.floatDirection = 1;
     }
     animateFloat() {
-        if (this.y > this.yMax) {
-            this.y = this.yMax;
+        if (player.inventory.has(this)) {
+            // check size of player inventory to move object to bottom of screen without overlap
+            this.x = 100 * this.inventoryIndex;
+            this.y = 535;
         }
-        ;
-        if (this.y === this.yMax) {
-            this.floatDirection = -0.25;
+        else {
+            // Floating objects oscillate between min and max positions
+            // This funciton simply takes the range y +/- 5 and moved ojbect.y between those
+            // swtiching directions when min or max is reached
+            if (this.y > this.yMax) {
+                this.y = this.yMax;
+            }
+            ;
+            if (this.y === this.yMax) {
+                this.floatDirection = -0.25;
+            }
+            ;
+            if (this.y < this.yMin) {
+                this.y = this.yMin;
+            }
+            ;
+            if (this.y === this.yMin) {
+                this.floatDirection = 0.25;
+            }
+            ;
+            this.y = this.y + this.floatDirection;
         }
-        ;
-        if (this.y < this.yMin) {
-            this.y = this.yMin;
+    }
+    renderInventory() {
+        if (player.inventory.has(this)) {
+            // check size of player inventory to move object to bottom of screen without overlap
+            this.x = 100 * this.inventoryIndex;
+            this.y = 535;
         }
-        ;
-        if (this.y === this.yMin) {
-            this.floatDirection = 0.25;
-        }
-        ;
-        this.y = this.y + this.floatDirection;
     }
 }
 // Winning block which is generated after key is picked up
 class WinningBlock extends GameObject {
+    // Wimming Block is a static game object upon which the player steps on to win the game
+    // It is only active once the player has picked up the key
     constructor(x, y, radius, sprite, points) {
         super(x, y, radius, sprite, points);
         this.radius = 10;
     }
+    ;
     checkInventoryForKey() {
+        // Player must have picked up the key to be able to 
+        // render the Wimmin blcok on the stage
         if (player.inventory.has(winKey)) {
             this.x = 404;
             this.y = 40;
@@ -170,21 +212,22 @@ class WinningBlock extends GameObject {
     }
     ;
     checkWin() {
+        // If the player is within the bloack AND has the key the game is won
         let insideBlock = Math.sqrt(Math.pow((player.x - this.x), 2) + Math.pow((player.y - this.y), 2)) < this.radius;
         if (player.hasKey && insideBlock) {
             player.win = true;
-            // Game Wine
+            // Game Win Function
         }
     }
-    ;
 }
 ;
 let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 20);
 staticGameObjects.push(winPad);
 let genFloatingGameObjects = function (gameObjectSprite, spawnLocationX, spawnLocationY, rad, points) {
     // Function generates Game objects with random x and y block placements
+    // and tries to get them not to overlap
     let [xObj, yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
-    // if there is already as object at the same y, re randomize
+    // if there is already as object at the same row or in the Winning Blocks column, re randomize
     floatingGameObjects.forEach(alreadyGenObjects => {
         if (yObj === alreadyGenObjects.y || yObj > 350 || xObj > 400) {
             yObj = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY)[1];
@@ -219,6 +262,8 @@ class Enemy {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     checkBoundary() {
+        // If the bug reaches the end of the stage reset its position to off stage to the left
+        // If the collision with another bug has changed the bugs speed, reset to dt inital
         if (this.x > 500) {
             genEnemiesProb();
             this.x = -100;
@@ -246,6 +291,8 @@ class Player {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     handleInput(text_input) {
+        // Take key board inputs and translate them into 
+        // X and Y movements in the characters
         if (text_input == 'up') {
             this.update(0, -1 * this.speed);
         }
@@ -264,6 +311,7 @@ class Player {
         ;
     }
     update(xUpdate = 0, yUpdate = 0) {
+        // xUpdate and yUpdate to X and Y positions of the player
         if (this.x + xUpdate > 400) {
             this.x = 410;
             xUpdate = 0;
@@ -279,20 +327,15 @@ class Player {
             yUpdate = 0;
         this.y = this.y + yUpdate;
     }
-    restart(status) {
-        if (this.win === false) {
-            let status = {
-                win: true,
-                startX: 200,
-                startY: 295
-            };
-        }
-        ;
-    }
-    ;
     reset() {
-        this.x = this.xInit;
-        this.y = this.xInit;
+        // move the character back to its intial position
+        // Unless Dead then he can be moved off screen
+        if (player.isDead) {
+        }
+        else {
+            this.x = this.xInit;
+            this.y = this.xInit;
+        }
     }
     addToInvenctory(gameObject) {
         if (gameObject.pickedUp) {
@@ -315,7 +358,8 @@ let keyboardInput = (function () {
         player.handleInput(allowedKeys[e.keyCode]);
     });
 })();
-const player = new Player(200, 395, 30, 'images/char-boy.png');
+// const player = new Player(200, 395, 30, gameUtils.characters.boy);
+const player = new Player(200, 395, 30, gameUtils.characters.boy);
 function gameStartGenEnemies(difficulty = 1) {
     // Generate Enemies at the start of the game with random speed at all lanes of the game
     for (let index = 0; index < 4; index++) {
@@ -380,11 +424,24 @@ let detectNearbyEnemies = function (enemyArray, yThresholdTop, yThresholdBottom,
 let collisionDetection = function () {
     // To reduce bumber of checks, first Enemies in larger radius deteched
     // then a subset closer to player as determined as colliding
-    let nearbyEnemies = detectNearbyEnemies(allEnemies, 50, 50, 100);
+    let nearbyEnemies = detectNearbyEnemies(allEnemies, 70, 70, 100);
     let collidingEnemies = detectNearbyEnemies(nearbyEnemies, 30, 50, 57);
     // If collision is detected Player health and lives are updated
     if (collidingEnemies.length > 0)
         updatePlayerHealth();
+};
+let detectOtherBugs = function () {
+    // Figure out which bugs have bugs in the same lane
+    allEnemies.forEach(thisBug => {
+        let bugsFollowingInLane = allEnemies.filter(bug => bug.y === thisBug.y).filter(bug => bug.x < thisBug.x);
+        bugsFollowingInLane.forEach(bug => {
+            if (bug.x > thisBug.x - 100) {
+                bug.dt = thisBug.dt;
+                bug.x = thisBug.x - 100;
+            }
+            ; // If Bug behind is close that THIS bugs position - a buffer of 100 pixels, make its speed the same as thisBugs speed so they dont bump
+        });
+    });
 };
 const updatePlayerHealth = function () {
     // If Collision is deteched player health is reduced
@@ -396,14 +453,11 @@ const updatePlayerHealth = function () {
         player.y = player.yInit;
         player.health += 100;
         player.lives -= 1;
-        updatePlayerHearts();
     }
     ;
     health.value = player.health;
     if (player.lives === 0) {
         player.isDead = true;
-        gameFinish();
-        resetGame();
     }
 };
 const updatePlayerHearts = function () {
@@ -434,6 +488,30 @@ const updatePlayerHearts = function () {
     //Append the heart fragment to HUD 
     hud.appendChild(frag);
 };
+function resetGame() {
+    allEnemies = allEnemies.splice(0, 10);
+    allEnemies.forEach(bug => {
+        bug.x = bug.xInit;
+        bug.y = bug.yInit;
+        bug.dt = bug.dtInitial;
+    });
+    player.x = player.xInit;
+    player.y = player.yInit;
+    player.lives = player.totalLives;
+    player.health = 100;
+    player.inventory.clear();
+    player.isDead = false;
+    player.hasKey = false;
+    player.win = false;
+    floatingGameObjects.forEach(item => {
+        item.x = item.xInit;
+        item.y = item.yInit;
+    });
+}
+// gameWinCheck = function(){
+//     if (player.win && player.hasKey) {
+//     }
+// }
 const gameFinish = function () {
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('end-screen').style.display = 'flex';
@@ -446,23 +524,11 @@ const gameFinish = function () {
             "Your hero is vicotrious. Thou shalt live like a king";
     }
 };
-const gameWin = function () {
+function gameWinSequence() {
+    // Enemies pause for a second and the end screen comes back up
     allEnemies.forEach(enemy => enemy.dt = 0);
     setTimeout(gameFinish, 2000);
-};
-let detectOtherBugs = function () {
-    // Figure out which bugs have bugs in the same lane
-    allEnemies.forEach(thisBug => {
-        let bugsFollowingInLane = allEnemies.filter(bug => bug.y === thisBug.y).filter(bug => bug.x < thisBug.x);
-        bugsFollowingInLane.forEach(bug => {
-            if (bug.x > thisBug.x - 100) {
-                bug.dt = thisBug.dt;
-                bug.x = thisBug.x - 100;
-            }
-            ; // If Bug behind is close that THIS bugs position - a buffer of 70 pixels, make its speed the same as thisBugs speed so they dont bump
-        });
-    });
-};
+}
 let StartGameButton = document.getElementsByClassName('start-button').item(0);
 StartGameButton.addEventListener('click', startGame, false);
 let playAgainButton = document.getElementById('play-again-button');
@@ -496,23 +562,3 @@ function changeHero(event) {
     ;
 }
 ;
-function resetGame() {
-    debugger;
-    allEnemies = allEnemies.splice(0, 10);
-    allEnemies.forEach(bug => {
-        bug.x = bug.xInit;
-        bug.y = bug.yInit;
-        bug.dt = bug.dtInitial;
-    });
-    player.reset();
-    player.lives = player.totalLives;
-    player.health = 100;
-    player.inventory.clear();
-    player.isDead = false;
-    player.hasKey = false;
-    player.win = false;
-    floatingGameObjects.forEach(item => {
-        item.x = item.xInit;
-        item.y = item.yInit;
-    });
-}
