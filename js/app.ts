@@ -184,7 +184,7 @@ class WinningBlock extends GameObject {
         let insideBlock = Math.sqrt((player.x - this.x) ** 2 + (player.y - this.y) ** 2) < this.radius;
         if (player.hasKey && insideBlock) {
             player.win = true;
-            gameWin();
+            // Game Wine
         }
     };
 };
