@@ -123,9 +123,10 @@ let floatingGameObjects: FloatingObject[] = [];
 
 // Player must first get the key to unlock door to win the game
 class GameObject {
+    name:string;
     x: number;
-    xInit: number;
     y: number;
+    xInit: number;
     yInit: number;
     radius: number
     sprite: string;
@@ -135,7 +136,8 @@ class GameObject {
     points: number;
 
 
-    constructor(x: number, y: number, radius: number, sprite: string, points: number) {
+    constructor(name:string, x: number, y: number, radius: number, sprite: string, points: number) {
+        this.name = name;
         this.x = x;
         this.y = y;
         this.xInit = x;
@@ -156,7 +158,6 @@ class GameObject {
 
     checkPickedUp() {
         // If the items is withing pickup radius for the player AND is not already in the inventory
-        
         if (this.insideRad() && !player.inventory.has(this)) {
             player.inventory.add(this);
             this.inventoryIndex = player.inventory.size
@@ -174,6 +175,12 @@ class GameObject {
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
+
+    reset(){
+        // Move objects have to thier initalzation positions
+        this.x = this.xInit;
+        this.y = this.yInit;
+    }
 };
 
 class FloatingObject extends GameObject {
@@ -181,8 +188,8 @@ class FloatingObject extends GameObject {
     yMin: number;
     floatDirection: number;
 
-    constructor(x: number, y: number, radius: number, sprite: string, points: number) {
-        super(x, y, radius, sprite, points);
+    constructor(name:string, x: number, y: number, radius: number, sprite: string, points: number) {
+        super(name, x, y, radius, sprite, points);
         this.xInit = x;
         this.yInit = y;
         this.radius = radius;
@@ -226,64 +233,80 @@ class WinningBlock extends GameObject {
     // Wimming Block is a static game object upon which the player steps on to win the game
     // It is only active once the player has picked up the key
 
-    constructor(x: number, y: number, radius: number, sprite: string, points: number) {
-        super(x, y, radius, sprite, points)
-        this.radius = 10;
+    constructor(name:string, x: number, y: number, radius: number, sprite: string, points: number) {
+        super(name, x, y, radius, sprite, points)
     };
 
-    checkInventoryForKey() {
-        // Player must have picked up the key to be able to 
-        // render the Wimmin blcok on the stage
-        if (player.inventory.has(winKey)) {
-            this.x = 404;
-            this.y = 40
-            player.hasKey = true;
-        }
-    };
-
-    checkWin() {
+    checkPlayerInsideWinBlock() {
         // If the player is within the bloack AND has the key the game is won
-        let insideBlock = Math.sqrt((player.x - this.x) ** 2 + (player.y - this.y) ** 2) < this.radius;
-        if (player.hasKey && insideBlock) {
-            player.win = true;
-            // Game Win Function
-        }
+        let insideBlock = Math.sqrt((player.x - this.x) ** 2 + (player.y - this.y) ** 2) <= this.radius;
+        
+        return insideBlock
+    }
+
+    checkPlayerHasKey(){
+        if (player.hasKey) {
+            this.x = 404;
+        } else {this.x = this.xInit};
     }
 };
 
-let winPad = new WinningBlock(1000, 40, 40, gameUtils.objectSprites.selector, 20);
+
+let winPad = new WinningBlock('winningBlock', 1000, 40, 20, gameUtils.objectSprites.selector, 20);
+// let winPad = new WinningBlock('winningBlock',1000, 40, 40, gameUtils.objectSprites.selector, 20);
 staticGameObjects.push(winPad);
 
+function getObjectCoords(objectQuery:string){
+    // This function goes through the floating items array
+    // and find the coordinates for the key so that gems
+    // are not rendered in the same place
+    let keyX = undefined;
+    let keyY = undefined;
+    floatingGameObjects.forEach( item => {
+        if(item.name === objectQuery){
+            keyX = item.x;
+            keyY = item.y
+        }
+    })
+    return [keyX, keyY];
+}
 
-let genFloatingGameObjects = function (
+
+let genFloatingGameObjects = function ( name:string,
     gameObjectSprite: string, spawnLocationX: number, spawnLocationY: number,
     rad: number, points: number) {
     // Function generates Game objects with random x and y block placements
     // and tries to get them not to overlap
 
     let [xObj, yObj] = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY);
+    let [keyX, keyY] = getObjectCoords('key');
 
     // if there is already as object at the same row or in the Winning Blocks column, re randomize
     floatingGameObjects.forEach(alreadyGenObjects => {
-        if (yObj === alreadyGenObjects.y || yObj > 350 || xObj > 400) {
+        if (xObj===alreadyGenObjects.x && yObj === alreadyGenObjects.y || yObj > 350 || xObj > 400) {
             yObj = gameUtils.randomizeLocation(spawnLocationX, spawnLocationY)[1]
         });
-    return new FloatingObject(xObj, yObj, rad, gameObjectSprite, points);
+    return new FloatingObject(name, xObj, yObj, rad, gameObjectSprite, points);
 };
 
+let genGameObjects = function(){
+    // Clear the Floating Objects array and pl;ayer inventory
+    //and generate new key and gem instances in random locations
+    floatingGameObjects = [];
+    
+    let winKey = genFloatingGameObjects('key', gameUtils.objectSprites.keypic, 4, 4, 40, 10);
+    floatingGameObjects.push(winKey);
 
-let winKey = genFloatingGameObjects(gameUtils.objectSprites.keypic, 4, 4, 40, 10);
-floatingGameObjects.push(winKey);
+    let blueGem = genFloatingGameObjects('blueGem', gameUtils.objectSprites.gemBlue, 3.5, 4.5, 55, 10)
+    floatingGameObjects.push(blueGem);
 
-let blueGem = genFloatingGameObjects(gameUtils.objectSprites.gemBlue, 3.5, 4.5, 55, 10)
-floatingGameObjects.push(blueGem);
+    let greenGem = genFloatingGameObjects('greenGem', gameUtils.objectSprites.gemGreen, 5, 4, 55, 10)
+    floatingGameObjects.push(greenGem);
 
-let greenGem = genFloatingGameObjects(gameUtils.objectSprites.gemGreen, 5, 4, 55, 10)
-floatingGameObjects.push(greenGem);
+    // genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
+    gameUtils.arrangeObjectsByY(floatingGameObjects)
 
-// genFloatingGameObjects(gameUtils.objectSprites.gemOrage, 5, 4, 50, 10)
-gameUtils.arrangeObjectsByY(floatingGameObjects)
-
+}
 
 
 // Enemies our player must avoid
@@ -421,6 +444,14 @@ class Player {
         };
     };
 
+    checkHasKey(){
+        this.inventory.forEach(item => {
+            if (item.name === 'key') {
+                this.hasKey = true;
+            }
+        });
+    };
+
 }
 
 
@@ -550,7 +581,6 @@ const updatePlayerHealth = function () {
 };
 
 
-
 const updatePlayerHearts = function () {
     // This function adds 3 hearts div to hud
     // it checks if its there, deletes and regenerarets
@@ -579,13 +609,45 @@ const updatePlayerHearts = function () {
         }
         frag.appendChild(heart);
     });
-
     //Append the heart fragment to HUD 
     hud.appendChild(frag);
 };
 
+function checkGameWin(){
+    if (winPad.checkPlayerInsideWinBlock() && player.hasKey ) {
+        player.win = true;
+    };
+};        
+
+
+const checkGameFinish = function () {
+    checkGameWin();
+    if (player.isDead) {
+        document.getElementById('end-screen-text').innerText =
+            "Your hero has fallen. Prehaps he shall rise again after a good night's rest.";
+        gameWinSequence();
+    } else if(player.win){
+        document.getElementById('end-screen-text').innerText =
+            "Your hero is vicotrious. Thou shalt live like a king";
+        gameWinSequence();
+    }
+};
+
+
+
+function gameWinSequence(funcPassed) {
+    // Enemies pause for a second and the end screen comes back up
+    allEnemies.forEach(enemy => enemy.dt = 0);
+    setTimeout(function(){
+        goToEndPage();
+        resetGame();
+    }, 2000);
+    
+};
+
 
 function resetGame() {
+    // Reset allEnemies array, player properties and item locations
     allEnemies = allEnemies.splice(0,10);
     allEnemies.forEach(bug => {
         bug.x = bug.xInit;
@@ -602,77 +664,42 @@ function resetGame() {
     player.hasKey = false;
     player.win = false;
 
-    floatingGameObjects.forEach(item => {
-        item.x = item.xInit;
-        item.y = item.yInit;
-    });
+    genGameObjects();
 }
 
 
+// Navigation Between Pages
 
-// gameWinCheck = function(){
-//     if (player.win && player.hasKey) {
-        
-//     }
-// }
-
-const gameFinish = function () {
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('end-screen').style.display = 'flex';
-
-    if (player.isDead) {
-        document.getElementById('end-screen-text').innerText =
-            "Your hero has fallen. Prehaps he shall rise again after a good night's rest.";
-    } else {
-        document.getElementById('end-screen-text').innerText =
-            "Your hero is vicotrious. Thou shalt live like a king";
+function goToGamePage(event) {
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+        document.getElementById('end-screen').style.display = 'none';
     }
-}
+};
 
-function gameWinSequence() {
-    // Enemies pause for a second and the end screen comes back up
-    allEnemies.forEach(enemy => enemy.dt = 0);
-    setTimeout(gameFinish, 2000);
-}
+function gotoIntroPage(event) {
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'flex';
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+    };
+};
 
+function goToEndPage(event) {
+    if (gameUtils.characterPicked) {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'flex';
+    };
+};
 
-
-
-
-let StartGameButton = document.getElementsByClassName('start-button').item(0);
-StartGameButton.addEventListener('click', startGame, false);
+let StartGameButton = document.getElementById('start-button');
+StartGameButton.addEventListener('click', goToGamePage, false);
 
 let playAgainButton = document.getElementById('play-again-button');
-playAgainButton.addEventListener('click', playAgain, false);
+playAgainButton.addEventListener('click', goToGamePage, false);
 
 let ChangeHeroButton = document.getElementById('change-hero-button');
-ChangeHeroButton.addEventListener('click', changeHero, false);
-
-function startGame(event) {
-    if (gameUtils.characterPicked) {
-        document.getElementById('intro-page').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'flex';
-        document.getElementById('end-screen').style.display = 'none';
-    }
-};
-
-
-function playAgain(event) {
-    if (gameUtils.characterPicked) {
-        document.getElementById('intro-page').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'flex';
-        document.getElementById('end-screen').style.display = 'none';
-    };
-    resetGame()
-};
-
-
-function changeHero(event) {
-    if (gameUtils.characterPicked) {
-        document.getElementById('intro-page').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'flex';
-        document.getElementById('end-screen').style.display = 'none';
-    };
-};
-
+ChangeHeroButton.addEventListener('click', gotoIntroPage, false);
 

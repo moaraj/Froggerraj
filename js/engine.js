@@ -78,6 +78,7 @@ var Engine = (function(global) {
         // Enemies rendered at the start of the game
         
         gameStartGenEnemies();
+        genGameObjects();
         updatePlayerHearts();
     }
 
@@ -97,6 +98,7 @@ var Engine = (function(global) {
         collisionDetection();
         detectOtherBugs();
         updatePlayerHearts();
+        checkGameFinish();
 
     }
 
@@ -108,24 +110,27 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
+        // allEnemies.forEach(bug => {bug.x = 0;bug.dt = 0}) for debugging
         
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-
-        winPad.checkInventoryForKey();
-        winPad.checkWin();
 
         floatingGameObjects.forEach(floatingObject => {
             floatingObject.animateFloat();
             // Check if the player is close and has picked up the object 
             // Object added to player.inventory
             floatingObject.checkPickedUp();
+            // Render inventory
             floatingObject.renderInventory();
         })
 
-        // Render inventory
+        
+        player.checkHasKey();
+        winPad.checkPlayerHasKey();
         player.update();
+
+
     }
 
     /* This function initially draws the "game level", it will then call
