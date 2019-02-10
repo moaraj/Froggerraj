@@ -1,10 +1,13 @@
 # Classic Frogger Remix
 
 ## Introduction
-![](https://github.com/moaraj/Froggerraj/blob/master/docs/GamePlay.gif)
+![](https://github.com/moaraj/Froggerraj/blob/master/docs/GamePlayCompressedWide.gif) 
+
 Froggeraj is a frogger arcade game clone made my Moaraj Hasan
 ## Table of Contents
-* [Instructions](#instructions)
+* [Gameplay Instructions](#instructions)
+* [Installation](#Installation)
+* [Dependencies](#Dependencies)
 * [Contributing](#Contributing)
 * [License](#License)
 ## Gameplay Instructions
@@ -21,8 +24,7 @@ git clone https://github.com/moaraj/Froggerraj.git
 2. Open index.html in chrome
 3. Play Froggeraj
 ## Dependencies
-- [JQuery](https://github.com/jquery/jquery)
-- [EasyTimer.js](https://albert-gonzalez.github.io/easytimer.js/)
+- [NES.css](https://nostalgic-css.github.io/NES.css/)
 ## Contributing
 To conbribute features to memoraj, fork the repo and send pull requests when an intresting feature has bee added.
 ## License
