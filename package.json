@@ -4,9 +4,19 @@
   "description": "Remix on retro frogger game",
   "main": "index.js",
   "dependencies": {
-    "nes.css": "^1.0.0"
+    "gulp": "^4.0.0",
+    "gulp-eslint": "^5.0.0",
+    "nes.css": "^1.0.0",
+    "pump": "^3.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "gulp-clean-css": "^4.0.0",
+    "gulp-image": "^4.4.1",
+    "gulp-uglify": "^3.0.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

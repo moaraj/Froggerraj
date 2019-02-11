@@ -27,8 +27,8 @@ var Engine = (function(global) {
     canvas.width = 505;
     canvas.height = 700;
     
-    let gameArea = document.getElementById("game-screen")
-    canvas.setAttribute("id", "gameCanvas")
+    let gameArea = document.getElementById("game-screen");
+    canvas.setAttribute("id", "gameCanvas");
     gameArea.appendChild(canvas);
 
 

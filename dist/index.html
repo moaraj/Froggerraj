@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Froggeraj</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="game-screen" id="intro-page">
+            
+            <h3>Select your hero</h3>
+            <div id="character-deck"></div>
+
+            <div class="difficulty-box">
+                <h3 class="title">Select difficulty</h3>
+
+                <div>
+                    <label data-children-count="1">
+                        <input type="radio" class="nes-radio" name="yes" checked="">
+                        <span>Easy</span>
+                    </label>
+                    <label data-children-count="1">
+                        <input type="radio" class="nes-radio" name="answer">
+                        <span>Hard</span>
+                    </label>
+                </div>
+
+                <div class="start">
+                    <button class="nes-button" id="start-button">Start Game</button>
+                </div>
+            </div> <!-- Difficulty Box -->
+        </div> <!-- Start Screen -->
+
+        <div class="game-screen" id="game-screen">
+            
+            <div class="hud-status">
+                <progress id="health" class="nes-progress is-error" value="100" max="100"></progress>
+            </div>
+        </div> <!-- Game Screen -->
+
+        <div class="game-screen" id="end-screen">
+            
+            <div class="nes-container is-rounded is-dark">
+                <p id="end-screen-text"></p>
+            </div>
+            <div><br><br><br><br>
+
+            </div>
+            <button type="button" id="play-again-button" class="nes-btn">Play Again</button>
+            <br>
+            <button type="button" id="change-hero-button" class="nes-btn">Change Hero or Difficulty</button>
+        </div><!-- Eng Screen -->
+
+    </div> <!-- container -->
+    <script src="js/resources.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/engine.js"></script>
+
+</body>
+</html>
